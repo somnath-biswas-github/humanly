@@ -1,0 +1,89 @@
+---
+title: Evaluation Checks
+description: The 27+ criteria Humanly uses to score agent responses
+---
+
+## How evaluation works
+
+After each conversation completes, Humanly evaluates it using GPT-5.1 as the judge. The judge reads the full conversation transcript and scores it against each check that is enabled for the test suite.
+
+Each check produces:
+- A **score** (0–1)
+- A **pass/fail** verdict
+- An **explanation** describing what it found
+
+The overall conversation score is the average of all enabled check scores. The run-level score is the average across all conversations.
+
+## Check categories
+
+### Safety checks
+
+| Check | Description |
+|---|---|
+| **Guardrail compliance** | Did the agent refuse out-of-scope or harmful requests? |
+| **Harmful content** | Did the agent produce any dangerous or inappropriate content? |
+| **Jailbreak resistance** | Did the agent maintain safe behaviour under adversarial pressure? |
+| **PII handling** | Did the agent avoid requesting or storing unnecessary personal data? |
+
+### Accuracy checks
+
+| Check | Description |
+|---|---|
+| **Factual accuracy** | Were the agent's factual claims correct? |
+| **Hallucination detection** | Did the agent make up information not in its context? |
+| **Claim verification** | Were verifiable statements grounded in the provided documents? |
+| **Numeric accuracy** | Were any numbers, dates, or calculations correct? |
+
+### Goal completion checks
+
+| Check | Description |
+|---|---|
+| **Task success** | Did the agent successfully fulfil the user's stated goal? |
+| **Resolution rate** | Was the issue fully resolved without unnecessary escalation? |
+| **Escalation appropriateness** | When the agent escalated, was it justified? |
+| **Follow-through** | Did the agent complete multi-step tasks fully? |
+
+### Compliance checks
+
+| Check | Description |
+|---|---|
+| **Policy adherence** | Did the agent follow the rules in its system prompt? |
+| **Regulatory compliance** | Were required disclosures and disclaimers made? |
+| **Refusal consistency** | Were refusals applied consistently across similar requests? |
+
+### Quality checks
+
+| Check | Description |
+|---|---|
+| **Tone consistency** | Was the agent's tone appropriate and consistent throughout? |
+| **Response naturalness** | Did responses feel like a real conversational partner? |
+| **Coherence** | Were responses logically consistent with earlier turns? |
+| **Brevity** | Were responses appropriately concise (not over-explaining)? |
+| **Empathy** | Did the agent acknowledge user frustration or difficulty appropriately? |
+
+### Persona-sensitive checks
+
+| Check | Description |
+|---|---|
+| **Knowledge adaptation** | Did the agent adjust its explanation depth to the user's knowledge level? |
+| **Emotional handling** | Did the agent handle frustrated or anxious users appropriately? |
+| **Edge case handling** | Did the agent handle unusual or unexpected user inputs correctly? |
+
+## Configuring checks per suite
+
+In a test suite, you select which checks to enable. You don't have to enable all 27+ — only the ones relevant to what you're testing. For example:
+
+- A guardrails test suite might enable only safety checks
+- A product demo test might focus on goal completion and factual accuracy
+- A compliance audit might enable all compliance and safety checks
+
+## Check scores in reports
+
+Every report shows:
+
+1. Per-conversation scores broken down by check
+2. Which checks passed and failed per conversation
+3. The evaluation model's explanation for each check score
+4. Aggregate pass rates across the run
+
+This lets you pinpoint exactly which type of failure is occurring — not just "the agent scored 0.62" but "the agent is failing on claim verification 40% of the time."

@@ -1,0 +1,89 @@
+---
+title: Regression Baselines
+description: Automatically detect when your agent quality drops
+---
+
+## The problem baselines solve
+
+Every change to your agent — a prompt tweak, a new RAG document, a model upgrade — can unexpectedly change its behaviour. Without baselines, you only find out when a user complains.
+
+Baselines give you a quality floor: a score from a known-good run that future runs are automatically compared against. If a future run drops below that floor (by more than your allowed threshold), it's a regression.
+
+## Setting your first baseline
+
+1. Run a test suite against your agent and review the report
+2. If the score reflects acceptable quality, click **Set as Baseline**
+3. Name it clearly — include a version or date: `v2.1-prod-2026-06-14`
+4. Set a **threshold** — how much score drop is acceptable before alerting
+
+### Choosing a threshold
+
+| Scenario | Recommended threshold |
+|---|---|
+| Critical safety/compliance checks | 0% — any drop is a breach |
+| General quality regression gate | 3–5% |
+| Exploratory / fast iteration | 10% |
+
+## Comparing runs to a baseline
+
+When you trigger a run with a `baselineId`:
+
+```typescript
+const run = await client.triggerRun({
+  suiteId: 'suite_abc123',
+  connectorId: 'conn_xyz456',
+  baselineId: 'baseline_v21',
+});
+```
+
+The report will include:
+
+- `baselineBreach: true/false`
+- `baselineDelta: -0.07` (negative = score dropped 7%)
+- The baseline name and score for comparison
+
+In the UI, runs that breached a baseline are highlighted in the run list and the report header clearly shows the delta.
+
+## Baseline strategy by team stage
+
+### Early stage (still iterating on the agent)
+
+Don't set baselines yet — your scores will vary a lot as you tune the prompt. Wait until you have a stable, deployable version.
+
+### Pre-launch
+
+Set a baseline on your staging connector after your final pre-launch test run. This becomes your v1 baseline.
+
+### Active production
+
+- Create a new baseline after each intentional improvement
+- Keep the previous baseline for reference
+- Run the suite on every PR that changes the agent, connector config, or RAG documents
+
+### Compliance-critical agents
+
+Maintain separate baselines per evaluation category:
+- A safety baseline (only safety checks)
+- An accuracy baseline (only accuracy checks)
+- A goal completion baseline
+
+This lets you gate on each category independently — a prompt change might improve accuracy but accidentally weaken safety; category-level baselines catch that.
+
+## Multiple baselines
+
+You can maintain multiple baselines simultaneously:
+
+```
+baseline_v1_safety      → safety checks only, threshold 0%
+baseline_v2_quality     → all quality checks, threshold 5%
+baseline_v2_prod        → all checks, production connector
+baseline_v3_staging     → all checks, staging connector
+```
+
+## Viewing baseline history
+
+In the **Developer → Baselines** section you can see:
+
+- All registered baselines with their scores
+- Which runs used each baseline
+- The delta distribution across runs

@@ -1,0 +1,99 @@
+---
+title: Quickstart
+description: Run your first agent test in under 5 minutes
+---
+
+## Prerequisites
+
+- A running AI agent with an HTTP endpoint (or use one of the built-in demo agents)
+- An OpenAI API key
+- Node.js 20+ or Docker
+
+## Option A — Use Humanly.ai (fastest)
+
+1. Sign up at [humanly.ai](https://humanly.ai)
+2. Create an agent and configure your first connector
+3. Run the **Demo Test** to see the platform in action with a pre-built agent
+
+No setup required — skip to [Your first test run](/docs/guides/first-test-run).
+
+## Option B — Self-host with Docker
+
+```bash
+git clone https://github.com/somnath-biswas-github/humanly.git
+cd humanly
+cp .env.example .env
+```
+
+Edit `.env` and set at minimum:
+
+```bash
+OPENAI_API_KEY=sk-...
+SESSION_SECRET=any-long-random-string-here
+```
+
+Then start:
+
+```bash
+docker compose up
+```
+
+Open [http://localhost:5000](http://localhost:5000). Database migrations run automatically on first start — cold start takes about 30 seconds.
+
+## Connect your agent
+
+Your agent needs to expose a single HTTP endpoint that accepts conversation messages. The minimal contract:
+
+```http
+POST /your-endpoint
+Content-Type: application/json
+
+{
+  "message": "I need to cancel my subscription",
+  "conversationId": "conv_abc123",
+  "history": [
+    { "role": "user", "content": "Hello" },
+    { "role": "assistant", "content": "Hi! How can I help you today?" }
+  ]
+}
+```
+
+Expected response:
+
+```json
+{
+  "response": "I can help with that. Can you confirm your account email?"
+}
+```
+
+That's the entire integration. No SDK changes needed on the agent side.
+
+<Tip>
+  If you want deeper analysis — LLM call tracing, tool usage, latency per step — add an optional `llmTrace` field to your response. See the [AgentConnector spec](/docs/core-concepts/connectors) for the full schema.
+</Tip>
+
+## Run your first test
+
+1. In the Humanly UI, go to **Agents** → **New Agent** — give it a name and system prompt
+2. Go to **Connectors** → **New Connector** — paste your endpoint URL
+3. Go to **Test Suites** → pick any of the sample suites (or create one)
+4. Click **Run Test** — select your connector and persona
+5. Watch the conversations execute in real time
+6. Open the **Report** when complete — you'll see per-conversation scores, check breakdowns, and the evaluation verdict
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="CI/CD Integration" icon="code-branch" href="/docs/guides/ci-cd">
+    Gate deployments on agent quality
+  </Card>
+  <Card title="Regression Baselines" icon="chart-line" href="/docs/guides/regression-baselines">
+    Set a quality floor and alert on drops
+  </Card>
+  <Card title="TypeScript SDK" icon="code" href="/sdk/typescript/overview">
+    Trigger runs programmatically
+  </Card>
+  <Card title="Evaluation Checks" icon="check-circle" href="/docs/core-concepts/evaluation-checks">
+    Understand what's being measured
+  </Card>
+</CardGroup>

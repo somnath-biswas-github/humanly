@@ -1,0 +1,76 @@
+---
+title: Introduction
+description: What Humanly is and why you need it
+---
+
+## What is Humanly?
+
+Humanly is an open-source platform for testing AI agents with synthetic users — automatically, repeatably, and as part of your CI/CD pipeline.
+
+Instead of manually chatting with your agent to check if it behaves correctly, Humanly generates realistic synthetic users — personas with different goals, knowledge levels, and behaviours — and runs structured conversations against your agent. Each conversation is evaluated against your criteria, scored, and compared to baselines. A single command can block a deployment if your agent regresses.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/docs/quickstart">
+    Run your first test in under 5 minutes
+  </Card>
+  <Card title="Self-Hosting" icon="server" href="/docs/self-hosting">
+    One-command Docker setup
+  </Card>
+  <Card title="CI/CD Integration" icon="code-branch" href="/docs/guides/ci-cd">
+    Gate deployments on agent quality
+  </Card>
+  <Card title="TypeScript SDK" icon="code" href="/sdk/typescript/overview">
+    Programmatic control with full types
+  </Card>
+</CardGroup>
+
+## Why Humanly?
+
+AI agents fail in ways that are hard to catch manually:
+
+- They handle edge cases correctly in testing but regress when you change the system prompt
+- They comply with guardrails for known phrases but not paraphrases
+- They perform well on simple cases but fail on the persona types your real users actually are
+- They pass your manual review but consistently fail users with high frustration
+
+Humanly catches these problems before they reach production by simulating a large, diverse set of users against every version of your agent.
+
+## How it works
+
+<Steps>
+  <Step title="Connect your agent">
+    Register your agent's HTTP endpoint as an **AgentConnector**. Humanly sends conversations to it and reads the responses — no SDK integration needed on the agent side.
+  </Step>
+  <Step title="Define test personas">
+    Create synthetic user personas with configurable traits: knowledge level, emotional state, communication style, and behaviour mode (cooperative, adversarial, or deceptive).
+  </Step>
+  <Step title="Configure a test suite">
+    Specify what to test: which personas run, how many conversations per persona, what evaluation criteria to apply, and how many turns per conversation.
+  </Step>
+  <Step title="Run and evaluate">
+    Humanly generates realistic user messages, sends them to your agent, and evaluates each response against your criteria using GPT-5.1 as the judge.
+  </Step>
+  <Step title="Gate deployments">
+    Set a quality baseline. Future runs that score below it trigger a failure — blocking the deployment automatically from your CI/CD pipeline.
+  </Step>
+</Steps>
+
+## What you can test
+
+Humanly's 27+ built-in evaluation checks cover the full range of agent quality dimensions:
+
+| Category | Examples |
+|---|---|
+| **Safety** | Guardrail compliance, refusal handling, harmful content detection |
+| **Accuracy** | Factual correctness, hallucination detection, claim verification |
+| **Goal completion** | Task success, resolution rate, escalation appropriateness |
+| **Compliance** | Regulatory adherence, policy enforcement, disclosure requirements |
+| **Quality** | Tone consistency, response naturalness, coherence |
+| **Performance** | Response latency, LLM call efficiency, token usage |
+
+## Self-host or use the cloud
+
+Humanly is fully open-source under AGPL-3.0. You can:
+
+- **Self-host** — run on your own infrastructure with a single `docker compose up`. Free forever.
+- **Use Humanly.ai** — the managed cloud platform with no setup, team collaboration, and usage-based billing.

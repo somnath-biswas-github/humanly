@@ -1,0 +1,93 @@
+---
+title: Test Suites
+description: Define what to test, how many conversations, and what to evaluate
+---
+
+## What is a test suite?
+
+A **test suite** (also called a test configuration) defines a complete test scenario:
+
+- Which **personas** to use as synthetic users
+- How many **conversations** to run per persona
+- How many **turns** per conversation
+- Which **evaluation checks** to apply
+- Optional: conversation prefixes (warm-up context)
+
+Test suites are reusable — create once, run against any connector, any number of times.
+
+## Suite configuration
+
+### Personas and conversations
+
+Each suite specifies one or more personas and how many times to run them. For example:
+
+- 3 conversations with "Standard Customer"
+- 2 conversations with "Frustrated User"
+- 1 conversation with "Adversarial User"
+
+Total: 6 conversations per run.
+
+More conversations = more reliable scores (less variance), but higher cost and runtime. A typical production gate uses 10–20 conversations.
+
+### Max turns
+
+The maximum number of back-and-forth exchanges per conversation. The synthetic user will try to achieve its goal within this limit.
+
+- **Short** (4–6 turns): spot checks, quick regression tests
+- **Medium** (8–12 turns): typical customer service interactions
+- **Long** (15–20 turns): complex multi-step tasks, troubleshooting flows
+
+### Evaluation criteria
+
+Select which of the 27+ evaluation checks to apply. Only selected checks are scored — this keeps evaluation focused and reduces cost.
+
+See [Evaluation Checks](/docs/core-concepts/evaluation-checks) for the full list.
+
+### Conversation prefixes
+
+A **conversation prefix** is a pre-recorded transcript that is injected at the start of each test conversation. This is useful for:
+
+- Testing a specific slice of a conversation (e.g. the refund request step, not the greeting)
+- Ensuring every conversation starts from the same state
+- Reducing the number of turns needed to reach the part you care about
+
+## Scenario files
+
+For structured, document-based testing, a suite can reference **scenario files** — JSON/YAML files that define specific user goals, expected outcomes, and test criteria. This is useful for:
+
+- Compliance testing with specific regulatory scenarios
+- Insurance claim scenarios
+- Banking product Q&A accuracy
+
+## Running a suite
+
+From the UI:
+1. Go to **Test Suites** → select a suite
+2. Click **Run Test**
+3. Select the connector (which environment to test against)
+4. Click **Start**
+
+From the API:
+
+```bash
+curl -X POST https://humanly.ai/v1/runs \
+  -H "Authorization: Bearer $HUMANLY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "suiteId": "suite_abc123",
+    "connectorId": "conn_xyz456"
+  }'
+```
+
+## A/B testing two agents
+
+Humanly supports running the **same suite simultaneously against two different agents** and comparing results side by side.
+
+Go to **A/B Test** → select two connectors → run. Both execute concurrently. The comparison report shows:
+
+- Winner summary and score delta
+- Per-check score table comparing both agents
+- Per-conversation tiles for each agent
+- Links to the full individual reports
+
+Token cost is 2× a normal run.

@@ -1,0 +1,215 @@
+---
+title: CI/CD Integration
+description: Gate deployments on agent quality with Humanly
+---
+
+## Overview
+
+Humanly integrates with any CI/CD system that can run a shell command or call an HTTP endpoint. The flow is:
+
+1. Deploy your agent to staging
+2. Trigger a Humanly test run against the staging connector
+3. Wait for the run to complete
+4. Compare the score against your baseline
+5. Pass or fail the pipeline based on the result
+
+## Prerequisites
+
+- A Humanly API key (from **Developer → API Keys**)
+- A registered test suite and connector
+- An optional baseline to compare against
+
+## GitHub Actions
+
+```yaml
+name: Agent Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  agent-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Humanly SDK
+        run: npm install @humanlyai/sdk
+
+      - name: Run agent quality gate
+        env:
+          HUMANLY_API_KEY: ${{ secrets.HUMANLY_API_KEY }}
+          HUMANLY_BASE_URL: ${{ secrets.HUMANLY_BASE_URL }}
+          SUITE_ID: ${{ vars.SUITE_ID }}
+          CONNECTOR_ID: ${{ vars.CONNECTOR_ID }}
+          BASELINE_ID: ${{ vars.BASELINE_ID }}
+        run: |
+          node -e "
+          const { HumanlyClient } = require('@humanlyai/sdk');
+          const client = new HumanlyClient({
+            apiKey: process.env.HUMANLY_API_KEY,
+            baseUrl: process.env.HUMANLY_BASE_URL || 'https://humanly.ai',
+          });
+
+          async function run() {
+            console.log('Triggering test run...');
+            const run = await client.triggerRun({
+              suiteId: process.env.SUITE_ID,
+              connectorId: process.env.CONNECTOR_ID,
+              baselineId: process.env.BASELINE_ID,
+              label: process.env.GITHUB_SHA,
+            });
+            console.log('Run ID:', run.id);
+
+            console.log('Waiting for completion...');
+            const report = await client.waitForRun(run.id);
+            console.log('Score:', report.overallScore.toFixed(3));
+            console.log('Pass rate:', (report.passRate * 100).toFixed(1) + '%');
+
+            if (report.baselineBreach) {
+              console.error('BASELINE BREACH: score dropped by', Math.abs(report.baselineDelta * 100).toFixed(1) + '%');
+              process.exit(1);
+            }
+
+            console.log('Quality gate PASSED');
+          }
+
+          run().catch(e => { console.error(e.message); process.exit(1); });
+          "
+```
+
+### Required secrets
+
+Add these in your GitHub repo under **Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+|---|---|
+| `HUMANLY_API_KEY` | Your API key (starts with `hmnly_`) |
+| `HUMANLY_BASE_URL` | `https://humanly.ai` or your self-hosted URL |
+
+### Required variables
+
+| Variable | Value |
+|---|---|
+| `SUITE_ID` | Your test suite ID (from the UI URL) |
+| `CONNECTOR_ID` | Your staging connector ID |
+| `BASELINE_ID` | Your baseline ID (optional but recommended) |
+
+---
+
+## GitLab CI
+
+```yaml
+agent-quality-gate:
+  stage: test
+  image: node:20-alpine
+  script:
+    - npm install @humanlyai/sdk
+    - |
+      node -e "
+      const { HumanlyClient } = require('@humanlyai/sdk');
+      const client = new HumanlyClient({ apiKey: process.env.HUMANLY_API_KEY });
+      client.triggerRun({
+        suiteId: process.env.SUITE_ID,
+        connectorId: process.env.CONNECTOR_ID,
+        baselineId: process.env.BASELINE_ID,
+        label: process.env.CI_COMMIT_SHA,
+      })
+      .then(run => client.waitForRun(run.id))
+      .then(report => {
+        console.log('Score:', report.overallScore);
+        if (report.baselineBreach) { console.error('Baseline breach'); process.exit(1); }
+      })
+      .catch(e => { console.error(e.message); process.exit(1); });
+      "
+  variables:
+    SUITE_ID: your-suite-id
+    CONNECTOR_ID: your-connector-id
+  only:
+    - main
+    - merge_requests
+```
+
+---
+
+## Jenkins
+
+```groovy
+pipeline {
+  agent any
+  stages {
+    stage('Agent Quality Gate') {
+      steps {
+        sh 'npm install @humanlyai/sdk'
+        withCredentials([string(credentialsId: 'humanly-api-key', variable: 'HUMANLY_API_KEY')]) {
+          sh '''
+            node -e "
+            const { HumanlyClient } = require('@humanlyai/sdk');
+            const client = new HumanlyClient({ apiKey: process.env.HUMANLY_API_KEY });
+            client.triggerRun({ suiteId: 'YOUR_SUITE_ID', connectorId: 'YOUR_CONNECTOR_ID' })
+              .then(run => client.waitForRun(run.id))
+              .then(report => {
+                if (report.baselineBreach) process.exit(1);
+              });
+            "
+          '''
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## REST API (any CI system)
+
+If you can't use the SDK, use the REST API directly:
+
+```bash
+# 1. Trigger a run
+RUN_ID=$(curl -s -X POST https://humanly.ai/v1/runs \
+  -H "Authorization: Bearer $HUMANLY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"suiteId":"'$SUITE_ID'","connectorId":"'$CONNECTOR_ID'"}' \
+  | jq -r '.id')
+
+echo "Run ID: $RUN_ID"
+
+# 2. Poll until complete
+while true; do
+  STATUS=$(curl -s https://humanly.ai/v1/runs/$RUN_ID \
+    -H "Authorization: Bearer $HUMANLY_API_KEY" | jq -r '.status')
+  echo "Status: $STATUS"
+  if [ "$STATUS" = "completed" ] || [ "$STATUS" = "failed" ]; then break; fi
+  sleep 10
+done
+
+# 3. Check for baseline breach
+BREACH=$(curl -s https://humanly.ai/v1/runs/$RUN_ID/report \
+  -H "Authorization: Bearer $HUMANLY_API_KEY" | jq '.baselineBreach')
+
+if [ "$BREACH" = "true" ]; then
+  echo "Baseline breached — deployment blocked"
+  exit 1
+fi
+echo "Quality gate passed"
+```
+
+## API key scopes
+
+The API key used for CI needs the following scopes:
+
+- `runs:write` — to trigger runs
+- `runs:read` — to poll status
+- `reports:read` — to read the final report
+- `baselines:read` — to read baseline data (if using baselines)
+
+Create a dedicated CI key in **Developer → API Keys** with only these scopes.

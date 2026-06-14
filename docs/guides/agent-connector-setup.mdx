@@ -1,0 +1,109 @@
+---
+title: AgentConnector Setup
+description: Connect your AI agent to Humanly in under 10 minutes
+---
+
+## Overview
+
+An AgentConnector tells Humanly where your agent lives and how to talk to it. Your agent doesn't need to install anything — it just needs to handle a specific JSON request format.
+
+## Option A — Use an accelerator template
+
+The fastest path. Download a pre-built server that already implements the protocol:
+
+1. In Humanly, go to **Developer → Accelerator Templates**
+2. Download the template for your framework (LangChain, LangGraph, Google ADK, OpenAI Agents SDK, or Generic REST)
+3. Drop it into your project and add your agent logic
+4. Deploy it
+
+Each template:
+- Implements the correct request/response format
+- Includes LLM trace output for deep analysis
+- Has a working example with sample agent logic
+- Includes a `README.md` with deployment instructions
+
+## Option B — Add the protocol to your existing agent
+
+If your agent already has an HTTP endpoint, add a route that handles Humanly's request format.
+
+### Express (Node.js)
+
+```typescript
+app.post('/humanly', async (req, res) => {
+  const { message, conversationId, history } = req.body;
+
+  // Add to your conversation state using conversationId
+  const response = await yourAgent.chat(message, history);
+
+  res.json({ response });
+});
+```
+
+### FastAPI (Python)
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class HumanlyRequest(BaseModel):
+    message: str
+    conversationId: str
+    history: list[dict]
+
+@app.post("/humanly")
+async def humanly_endpoint(req: HumanlyRequest):
+    response = await your_agent.chat(req.message, req.history)
+    return {"response": response}
+```
+
+### Adding LLM traces (optional but recommended)
+
+```python
+@app.post("/humanly")
+async def humanly_endpoint(req: HumanlyRequest):
+    start = time.time()
+    
+    with tracer.start() as trace:
+        response = await your_agent.chat(req.message, req.history)
+    
+    return {
+        "response": response,
+        "llmTrace": {
+            "framework": "custom",
+            "totalLatencyMs": int((time.time() - start) * 1000),
+            "llmCalls": trace.llm_calls,
+            "toolCalls": trace.tool_calls,
+        }
+    }
+```
+
+## Register the connector in Humanly
+
+1. Go to **Connectors** → **New Connector**
+2. Fill in:
+   - **Agent**: the agent this connector belongs to
+   - **Environment**: development / staging / production
+   - **Base URL**: `https://your-agent.com`
+   - **Path**: `/humanly` (or whatever path you used)
+   - **Auth**: configure if your endpoint is protected
+3. Click **Save** → **Test Connection**
+
+The test sends a ping request. If it succeeds, the connector is ready to use.
+
+## Troubleshooting
+
+### "Connection refused" or "timeout"
+
+- Check that your agent is running and reachable from the internet (or from your Humanly instance if self-hosted)
+- Check your firewall rules
+- Verify the base URL and path are correct
+
+### "Invalid response format"
+
+Your agent's response must include a `response` string field at the top level. Check that you're returning JSON (not plain text) with the correct structure.
+
+### "401 Unauthorized"
+
+Configure the auth type and credentials in the connector settings to match your agent's authentication requirements.

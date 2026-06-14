@@ -1,0 +1,78 @@
+---
+title: Agents & Personas
+description: The two primary actors in every Humanly test
+---
+
+## Agents
+
+An **Agent** in Humanly represents the AI system you want to test. It holds the configuration that defines how your AI behaves: its system prompt, the model it uses, and any RAG documents it can retrieve from.
+
+Agents in Humanly can be:
+
+- **Built-in agents** — defined entirely within Humanly (system prompt + model + documents). Used for rapid prototyping and testing prompt changes.
+- **External agents** — your own deployed AI system, connected via an [AgentConnector](/docs/core-concepts/connectors). The agent runs on your infrastructure; Humanly just sends it messages and evaluates the responses.
+
+### Agent configuration
+
+| Field | Description |
+|---|---|
+| **Name** | Identifier for the agent in reports and comparisons |
+| **System prompt** | The instruction set given to the LLM |
+| **Model** | GPT-4o, GPT-4o Mini, GPT-4 Turbo, or GPT-3.5 Turbo |
+| **RAG enabled** | Whether to retrieve from uploaded documents |
+| **Documents** | Uploaded files (PDF, TXT, DOCX) used for retrieval |
+| **Chunk size / overlap** | RAG chunking parameters |
+| **Top K** | Number of chunks to retrieve per turn |
+
+### Agent versions
+
+Every time you save a significant change to an agent's configuration, Humanly can snapshot it as an **AgentVersion**. Runs are linked to the version that was active when they were triggered — so you can always trace a report back to the exact configuration that produced it.
+
+---
+
+## Personas
+
+A **Persona** is a synthetic user profile that defines how a simulated user behaves during a test conversation. Every test run involves one or more personas sending messages to your agent.
+
+Personas are not just demographic labels — they carry behavioural attributes that directly influence the LLM that generates synthetic user messages.
+
+### Behaviour mode
+
+The most important attribute. Controls the fundamental intent of the synthetic user:
+
+| Mode | Description | Use for |
+|---|---|---|
+| **Good** | Cooperative, goal-oriented, realistic user | Standard happy-path and edge-case testing |
+| **Bad** | Tries to misuse or manipulate the agent | Guardrail and safety testing |
+| **Liar** | Provides false information to test agent verification | Trust and validation testing |
+
+### Persona attributes
+
+| Attribute | Options |
+|---|---|
+| **Knowledge level** | Novice, Intermediate, Expert |
+| **Emotional state** | Calm, Frustrated, Confused, Angry, Anxious, Impatient, Friendly |
+| **Communication style** | Influences message phrasing and vocabulary |
+| **Background** | Free-text context that shapes what the user knows and cares about |
+
+### How personas generate messages
+
+Each turn, the synthetic user LLM (GPT-5.1 or GPT-4o, configurable) is given:
+
+1. The persona's full profile
+2. The conversation history so far
+3. The evaluation criteria being tested (so the user asks relevant questions)
+4. An instruction to stay in character
+
+This produces realistic, varied messages — not templated scripts. Two runs with the same persona will produce different conversations.
+
+### Sample personas
+
+Humanly ships with pre-built personas for common testing scenarios:
+
+- **Standard Customer** — cooperative, intermediate knowledge, calm
+- **Frustrated User** — cooperative intent but emotionally elevated
+- **Adversarial User** — attempts to jailbreak or misuse the agent
+- **Low-knowledge User** — novice, may misunderstand instructions
+
+You can create as many custom personas as you need.

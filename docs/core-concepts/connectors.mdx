@@ -1,0 +1,120 @@
+---
+title: AgentConnectors
+description: How Humanly connects to your external AI agent
+---
+
+## What is an AgentConnector?
+
+An **AgentConnector** is the HTTP configuration that tells Humanly how to reach your deployed AI agent. It acts as the bridge between Humanly's test runner and your agent's endpoint.
+
+One agent can have multiple connectors — one per environment (development, staging, production). This lets you run the same test suite against different deployments without changing anything except which connector you select.
+
+## The connector protocol
+
+Your agent needs to expose a single HTTP endpoint. Humanly sends a POST request for each conversation turn:
+
+### Request
+
+```json
+{
+  "message": "I need to cancel my policy",
+  "conversationId": "conv_abc123",
+  "history": [
+    { "role": "user", "content": "Hello" },
+    { "role": "assistant", "content": "Hi! How can I help you?" }
+  ]
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `message` | string | The current user message |
+| `conversationId` | string | Stable ID for the conversation — use this to maintain state |
+| `history` | array | All previous turns in the conversation |
+
+### Response (minimal)
+
+```json
+{
+  "response": "I can help with that. Can you confirm your policy number?"
+}
+```
+
+That's the complete required interface. No library changes, no SDK installation.
+
+### Response (with LLM trace)
+
+For deeper analysis, include an optional `llmTrace` field:
+
+```json
+{
+  "response": "I can help with that. Can you confirm your policy number?",
+  "llmTrace": {
+    "framework": "langchain",
+    "totalLatencyMs": 1243,
+    "llmCalls": [
+      {
+        "model": "gpt-4o",
+        "inputTokens": 892,
+        "outputTokens": 47,
+        "latencyMs": 1180
+      }
+    ],
+    "toolCalls": [
+      {
+        "name": "lookup_policy",
+        "inputSummary": "policy_id: null",
+        "outputSummary": "error: policy_id required",
+        "latencyMs": 63
+      }
+    ]
+  }
+}
+```
+
+When `llmTrace` is present, Humanly displays a detailed trace view in the report — showing each LLM call, tool invocation, and latency breakdown.
+
+## Connector configuration
+
+| Field | Description |
+|---|---|
+| **Name** | Human-readable name (e.g. "Production v2") |
+| **Environment** | development / staging / production |
+| **Base URL** | Your agent's base URL (e.g. `https://api.yourdomain.com`) |
+| **Path** | Endpoint path (e.g. `/agent/chat`) |
+| **Auth type** | none / API key / Bearer token |
+| **Timeout** | Request timeout in ms (default: 30,000) |
+| **Retry config** | Retry count and backoff for transient failures |
+
+## Authentication
+
+### No auth
+For internal or development endpoints.
+
+### API Key
+Humanly sends a header with your key:
+```
+X-Api-Key: your-api-key-here
+```
+Configure the header name and key value in the connector settings.
+
+### Bearer token
+```
+Authorization: Bearer your-token-here
+```
+
+All secrets are stored encrypted.
+
+## Accelerator templates
+
+If you're building a new agent, download one of Humanly's accelerator templates — pre-built FastAPI or Express servers that already implement the connector protocol:
+
+| Template | Framework |
+|---|---|
+| LangChain | Python / FastAPI |
+| LangGraph | Python / FastAPI |
+| Google ADK | Python / FastAPI |
+| OpenAI Agents SDK | Python / FastAPI |
+| Generic REST | Any |
+
+Each template includes LLM trace support out of the box, so you get full trace analysis from day one.

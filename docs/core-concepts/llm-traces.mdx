@@ -1,0 +1,103 @@
+---
+title: LLM Traces
+description: Deep visibility into what your agent did on every turn
+---
+
+## What are LLM traces?
+
+An **LLM trace** is optional structured data your agent can include in its response to provide visibility into its internal operations: which LLM calls were made, which tools were invoked, latency at each step, and token usage.
+
+When traces are present, Humanly displays a detailed trace view alongside each conversation turn — giving you visibility into not just *what* the agent said, but *how* it arrived at that response.
+
+## Why traces matter
+
+Without traces, you know the agent gave the wrong answer. With traces, you know:
+
+- Whether it retrieved the wrong documents
+- Whether a tool call failed silently
+- Whether the LLM was called 4 times when it should have been called once
+- Where the latency is actually coming from
+- Whether the agent is reasoning correctly between steps
+
+## Trace format
+
+Include a `llmTrace` object in your connector's response:
+
+```json
+{
+  "response": "Your policy is currently active.",
+  "llmTrace": {
+    "framework": "langchain",
+    "totalLatencyMs": 1843,
+    "llmCalls": [
+      {
+        "model": "gpt-4o",
+        "inputTokens": 1203,
+        "outputTokens": 89,
+        "latencyMs": 1640,
+        "purpose": "generate_response"
+      }
+    ],
+    "toolCalls": [
+      {
+        "name": "lookup_policy_status",
+        "inputSummary": "policy_id: POL-123456",
+        "outputSummary": "status: active, expires: 2027-01-01",
+        "latencyMs": 203,
+        "success": true
+      }
+    ],
+    "steps": [
+      {
+        "type": "retrieval",
+        "description": "Retrieved 3 policy document chunks",
+        "latencyMs": 180
+      }
+    ]
+  }
+}
+```
+
+### Fields
+
+| Field | Required | Description |
+|---|---|---|
+| `framework` | No | `langchain`, `langgraph`, `google-adk`, `openai-agents`, `custom` |
+| `totalLatencyMs` | No | End-to-end latency for this turn |
+| `llmCalls` | No | Array of LLM invocations |
+| `toolCalls` | No | Array of tool/function invocations |
+| `steps` | No | Arbitrary steps (retrieval, routing, etc.) |
+
+### LLM call fields
+
+| Field | Description |
+|---|---|
+| `model` | Model name (e.g. `gpt-4o`) |
+| `inputTokens` | Prompt token count |
+| `outputTokens` | Completion token count |
+| `latencyMs` | Time for this call |
+| `purpose` | Optional label describing what this call was for |
+
+### Tool call fields
+
+| Field | Description |
+|---|---|
+| `name` | Tool/function name |
+| `inputSummary` | Brief summary of inputs (avoid PII) |
+| `outputSummary` | Brief summary of output |
+| `latencyMs` | Time for this call |
+| `success` | Whether the call succeeded |
+
+## Viewing traces in reports
+
+When a run includes traces, the conversation report shows a **Trace** tab for each turn. Click any turn to see:
+
+- The full trace timeline
+- Each LLM call with token usage
+- Tool invocations and their results
+- Latency breakdown by step
+- Total cost estimate for the turn
+
+## Framework support
+
+Humanly's accelerator templates for LangChain, LangGraph, Google ADK, and OpenAI Agents SDK all include built-in trace generation — you get full trace support without writing any instrumentation code.

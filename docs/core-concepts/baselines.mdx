@@ -1,0 +1,89 @@
+---
+title: Baselines
+description: Set a quality floor and automatically detect regressions
+---
+
+## What is a baseline?
+
+A **baseline** is a snapshot of a run's quality score that future runs are compared against. When a new run scores below the baseline (by more than the configured threshold), it's flagged as a **regression**.
+
+Baselines are the foundation of Humanly's CI/CD integration — they turn subjective "is this agent good enough?" questions into objective pass/fail gates.
+
+## Creating a baseline
+
+After a run completes and you're satisfied with the quality:
+
+**Via the UI:**
+1. Open the run report
+2. Click **Set as Baseline**
+3. Give it a name (e.g. `v1.2 production baseline`)
+4. Set the regression threshold (default: 0%)
+
+**Via the API:**
+
+```typescript
+const baseline = await client.createBaseline({
+  runId: 'run_abc123',
+  name: 'v1.2 production baseline',
+  threshold: 0.05, // allow up to 5% score drop
+});
+```
+
+**Via the REST API:**
+
+```bash
+curl -X POST https://humanly.ai/v1/baselines \
+  -H "Authorization: Bearer $HUMANLY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "runId": "run_abc123",
+    "name": "v1.2 production baseline",
+    "threshold": 0.05
+  }'
+```
+
+## Regression threshold
+
+The threshold controls how much score drop is allowed before a baseline breach is triggered.
+
+| Threshold | Meaning |
+|---|---|
+| `0` (default) | Any score drop triggers a breach |
+| `0.05` | Up to 5% score drop is allowed |
+| `0.1` | Up to 10% score drop is allowed |
+
+Setting a small threshold (e.g. 2–5%) avoids false positives from natural score variation between runs while still catching real regressions.
+
+## Using baselines in CI/CD
+
+Pass the `baselineId` when triggering a run:
+
+```typescript
+const run = await client.triggerRun({
+  suiteId: 'suite_abc123',
+  connectorId: 'conn_xyz456',
+  baselineId: 'baseline_v12',
+});
+
+const report = await client.waitForRun(run.id);
+
+if (report.baselineBreach) {
+  console.error(
+    `Regression: score dropped by ${Math.abs(report.baselineDelta * 100).toFixed(1)}%`
+  );
+  process.exit(1); // fail the CI pipeline
+}
+```
+
+## Baseline lifecycle
+
+- **Baselines are immutable** — once created, the score doesn't change
+- **Multiple baselines can coexist** — useful for tracking different environments (staging vs production) or different agent versions
+- **Baselines are per-suite** — comparing runs on different suites against the same baseline doesn't make sense; keep one baseline per suite
+
+## Best practices
+
+- Create a new baseline whenever you intentionally improve your agent (prompt update, RAG update, model upgrade)
+- Use a 2–5% threshold for production gates and 0% for critical safety/compliance checks
+- Keep the baseline name tied to a version or date: `v2.1-gpt4o-2026-06-14`
+- Run the same suite against your baseline-linked connector after any deployment, not just before release

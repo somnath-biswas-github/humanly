@@ -1,0 +1,143 @@
+---
+title: Self-Hosting Guide
+description: Run Humanly on your own infrastructure
+---
+
+## Requirements
+
+| Component | Minimum | Recommended |
+|---|---|---|
+| RAM | 2 GB | 4 GB |
+| CPU | 1 core | 2 cores |
+| Disk | 10 GB | 20 GB |
+| Docker | 24+ | latest |
+| Docker Compose | v2 | v2 |
+
+## Quick setup
+
+```bash
+git clone https://github.com/somnath-biswas-github/humanly.git
+cd humanly
+cp .env.example .env
+# Edit .env — see Environment Variables below
+docker compose up -d
+```
+
+The app starts on port 5000. First startup takes ~30 seconds (database migrations run automatically).
+
+Check it's healthy:
+
+```bash
+curl http://localhost:5000/health
+# {"status":"ok"}
+```
+
+## Environment Variables
+
+### Required
+
+| Variable | Description |
+|---|---|
+| `OPENAI_API_KEY` | Used for synthetic user generation and evaluation verdicts |
+| `SESSION_SECRET` | Random string for signing sessions — generate with `openssl rand -hex 32` |
+
+### Optional — Email
+
+| Variable | Description |
+|---|---|
+| `SENDGRID_API_KEY` | Required for password reset emails |
+| `SENDGRID_FROM_EMAIL` | Sender address for emails |
+
+### Optional — Auth
+
+| Variable | Description |
+|---|---|
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `LINKEDIN_CLIENT_ID` | LinkedIn OAuth |
+| `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth |
+
+### Optional — Billing
+
+| Variable | Description |
+|---|---|
+| `STRIPE_SECRET_KEY` | Stripe secret key — only needed if enabling billing |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+
+## Persistent data
+
+| Data | Storage |
+|---|---|
+| Database | Named Docker volume `humanly_postgres_data` |
+| Uploaded documents | Bind-mounted directory `./uploads` |
+
+Both persist across container restarts and upgrades.
+
+## Upgrading
+
+```bash
+git pull
+docker compose build --no-cache
+docker compose up -d
+```
+
+Database migrations run automatically on startup. No manual migration step needed.
+
+## Custom port
+
+To run on a port other than 5000, edit `docker-compose.yml`:
+
+```yaml
+ports:
+  - "8080:5000"  # external:internal
+```
+
+Or set the `PORT` environment variable (default: 5000).
+
+## Running behind a reverse proxy
+
+If running behind Nginx or Caddy, set `NODE_ENV=production` and configure your proxy to forward the `X-Forwarded-For` and `X-Forwarded-Proto` headers. Example Nginx config:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name humanly.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+## External PostgreSQL
+
+To use an external PostgreSQL instance instead of the Docker-managed one, override `DATABASE_URL` in `.env`:
+
+```bash
+DATABASE_URL=postgresql://user:password@your-db-host:5432/humanly
+```
+
+Then remove the `postgres` service from `docker-compose.yml` and remove the `depends_on` block from the `app` service.
+
+## Health check
+
+```
+GET /health
+```
+
+Returns `{"status":"ok"}` when the app is running and the database is reachable. Use this for uptime monitoring and load balancer health checks.
+
+## Production checklist
+
+- [ ] `SESSION_SECRET` is a long random string (not the placeholder)
+- [ ] `NODE_ENV=production` is set
+- [ ] Running behind HTTPS (self-signed is fine for internal use; Let's Encrypt for public)
+- [ ] `./uploads` volume is backed up regularly
+- [ ] `humanly_postgres_data` volume is backed up regularly
+- [ ] Set resource limits in `docker-compose.yml` for production workloads

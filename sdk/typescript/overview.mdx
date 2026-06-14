@@ -1,0 +1,84 @@
+---
+title: TypeScript SDK Overview
+description: "@humanlyai/sdk — full type-safe access to the Humanly API"
+---
+
+## Installation
+
+```bash
+npm install @humanlyai/sdk
+```
+
+## Initialise the client
+
+```typescript
+import { HumanlyClient } from '@humanlyai/sdk';
+
+const client = new HumanlyClient({
+  apiKey: process.env.HUMANLY_API_KEY!,
+  baseUrl: 'https://humanly.ai', // or your self-hosted URL
+});
+```
+
+### Options
+
+| Option | Type | Required | Default |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | — |
+| `baseUrl` | `string` | No | `https://humanly.ai` |
+| `timeout` | `number` (ms) | No | `30000` |
+
+## The CI/CD pattern
+
+The most common use case — trigger a run, wait for it, check for regressions:
+
+```typescript
+const run = await client.triggerRun({
+  suiteId: process.env.SUITE_ID!,
+  connectorId: process.env.CONNECTOR_ID!,
+  baselineId: process.env.BASELINE_ID,
+  label: process.env.GITHUB_SHA,
+});
+
+const report = await client.waitForRun(run.id);
+
+console.log(`Score: ${report.overallScore.toFixed(3)}`);
+console.log(`Pass rate: ${(report.passRate * 100).toFixed(1)}%`);
+
+if (report.baselineBreach) {
+  console.error(`Regression: score dropped ${Math.abs(report.baselineDelta * 100).toFixed(1)}%`);
+  process.exit(1);
+}
+```
+
+## Error handling
+
+The SDK throws `HumanlyError` on API errors. 429 rate-limit responses are automatically retried using the `Retry-After` header.
+
+```typescript
+try {
+  const report = await client.waitForRun(run.id);
+} catch (err) {
+  if (err instanceof Error && err.name === 'HumanlyError') {
+    const e = err as any;
+    console.error(`API error ${e.status}: ${e.message}`);
+  }
+}
+```
+
+## All methods
+
+| Method | Returns |
+|---|---|
+| `triggerRun(options)` | `Promise<Run>` |
+| `getRun(id)` | `Promise<Run>` |
+| `listRuns()` | `Promise<Run[]>` |
+| `getReport(runId)` | `Promise<Report>` |
+| `waitForRun(runId, interval?, timeout?)` | `Promise<Report>` |
+| `createBaseline(options)` | `Promise<Baseline>` |
+| `getBaseline(id)` | `Promise<Baseline>` |
+| `listBaselines()` | `Promise<Baseline[]>` |
+| `listAgents()` | `Promise<Agent[]>` |
+| `listPersonas()` | `Promise<Persona[]>` |
+| `listConnectors()` | `Promise<Connector[]>` |
+| `listSuites()` | `Promise<Suite[]>` |

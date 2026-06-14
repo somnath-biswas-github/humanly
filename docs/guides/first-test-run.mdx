@@ -1,0 +1,86 @@
+---
+title: Your First Test Run
+description: Step-by-step guide to running your first agent test
+---
+
+## What you'll need
+
+- A Humanly account (cloud or self-hosted)
+- An agent endpoint — or use one of the built-in demo agents
+
+<Tip>
+  If you don't have an agent yet, use the **Demo Test** feature. It runs a pre-built Insurance Claims, Banking, or Telecom agent with full LLM traces so you can see everything Humanly can do before connecting your own agent.
+</Tip>
+
+## Step 1 — Create an agent record
+
+Go to **Agents** in the sidebar → **New Agent**.
+
+If you're connecting an external agent (your own deployment), give it a name and a placeholder system prompt — the actual prompt lives in your agent. If you're testing a Humanly-built agent, write the full system prompt here.
+
+## Step 2 — Create a connector
+
+Go to **Connectors** → **New Connector**.
+
+- **Agent**: select the agent you just created
+- **Environment**: choose `production`, `staging`, or `development`
+- **Base URL**: your agent's base URL (e.g. `https://api.yourdomain.com`)
+- **Path**: the endpoint path (e.g. `/chat`)
+- **Auth**: configure if your endpoint requires authentication
+
+Save and click **Test Connection** — Humanly sends a ping to verify the endpoint is reachable.
+
+## Step 3 — Pick or create a test suite
+
+Go to **Test Suites**.
+
+Sample suites are included for common scenarios (customer service, insurance, banking, telecom). You can use one of those, or create your own:
+
+- Click **New Suite**
+- Give it a name
+- Add personas (select from existing or create new ones)
+- Set conversations per persona (start with 2–3)
+- Set max turns (8 is a good default)
+- Select which evaluation checks to enable
+
+## Step 4 — Run the test
+
+Click **Run Test** on your suite → select your connector → click **Start Run**.
+
+You'll see the run dashboard with real-time progress:
+
+- Each conversation appears as it starts
+- Turns update live as the synthetic user and your agent exchange messages
+- Check scores appear as conversations complete
+
+A 10-conversation run with 8 turns typically takes 3–8 minutes depending on your agent's response speed.
+
+## Step 5 — Read the report
+
+When the run completes, click **View Report**.
+
+The report shows:
+
+- **Overall score** — the average across all conversations and checks
+- **Pass rate** — percentage of conversations that passed all enabled checks
+- **Per-conversation breakdown** — click any conversation to read the full transcript and see check scores with explanations
+- **Check summary** — which checks passed/failed across the whole run, with failure examples
+
+## Step 6 — Set a baseline
+
+If you're happy with the score, set this run as a quality baseline:
+
+Click **Set as Baseline** → name it (e.g. `initial-v1`) → set a threshold (5% is a good start) → save.
+
+From now on, any run that scores more than 5% below this baseline will be flagged as a regression — useful for CI/CD gating.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="CI/CD Integration" icon="code-branch" href="/docs/guides/ci-cd">
+    Automate test runs from your pipeline
+  </Card>
+  <Card title="Regression Baselines" icon="chart-line" href="/docs/guides/regression-baselines">
+    Gate deployments on quality
+  </Card>
+</CardGroup>

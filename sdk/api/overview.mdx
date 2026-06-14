@@ -1,0 +1,74 @@
+---
+title: REST API Overview
+description: The Humanly v1 REST API
+---
+
+## Base URL
+
+```
+https://humanly.ai/v1
+```
+
+For self-hosted instances:
+
+```
+http://localhost:5000/v1
+```
+
+## Authentication
+
+All API requests require an API key in the `Authorization` header:
+
+```
+Authorization: Bearer hmnly_your_api_key_here
+```
+
+Create API keys at **Developer → API Keys** in the Humanly UI.
+
+## API key scopes
+
+Keys have granular permission scopes. Request only the scopes your integration needs:
+
+| Scope | Grants |
+|---|---|
+| `runs:write` | Trigger new test runs |
+| `runs:read` | Read run status and list runs |
+| `reports:read` | Read full evaluation reports |
+| `baselines:write` | Create new baselines |
+| `baselines:read` | Read baseline data |
+| `connectors:read` | List connectors |
+| `suites:read` | List test suites |
+
+## Response format
+
+All responses are JSON. Errors follow this format:
+
+```json
+{
+  "error": "Run not found",
+  "code": "NOT_FOUND",
+  "status": 404
+}
+```
+
+## Rate limiting
+
+The API is rate-limited. When you exceed the limit, you'll receive a `429` response with a `Retry-After` header indicating how many seconds to wait.
+
+The TypeScript SDK handles 429 retries automatically.
+
+## Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/v1/runs` | Trigger a test run |
+| `GET` | `/v1/runs` | List runs |
+| `GET` | `/v1/runs/:id` | Get run status |
+| `GET` | `/v1/runs/:id/report` | Get full report |
+| `POST` | `/v1/baselines` | Create a baseline |
+| `GET` | `/v1/baselines` | List baselines |
+| `GET` | `/v1/baselines/:id` | Get a baseline |
+| `GET` | `/v1/agents` | List agents |
+| `GET` | `/v1/personas` | List personas |
+| `GET` | `/v1/connectors` | List connectors |
+| `GET` | `/v1/suites` | List test suites |
