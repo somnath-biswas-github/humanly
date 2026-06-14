@@ -1,0 +1,34 @@
+{
+  "name": "@humanly/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for the Humanly AI agent testing platform",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": ["ai", "agent", "testing", "regression", "ci-cd", "humanly"],
+  "author": "Humanly",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/somnath-biswas-github/humanly.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://humanly.ai/docs/sdk",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}
