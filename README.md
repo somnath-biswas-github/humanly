@@ -5,7 +5,7 @@
 Run regression suites, evaluate conversations, and gate deployments on quality, compliance, and performance — all from your CI/CD pipeline. Self-host or use [Humanly.ai](https://humanly.ai).
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![npm](https://img.shields.io/npm/v/@humanly/sdk)](https://www.npmjs.com/package/@humanly/sdk)
+[![npm](https://img.shields.io/npm/v/@humanlyai/sdk)](https://www.npmjs.com/package/@humanlyai/sdk)
 [![Docker](https://img.shields.io/badge/docker-ready-blue)](https://hub.docker.com/r/humanlyai/humanly)
 
 ---

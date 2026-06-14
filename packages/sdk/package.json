@@ -1,5 +1,5 @@
 {
-  "name": "@humanly/sdk",
+  "name": "@humanlyai/sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for the Humanly AI agent testing platform",
   "main": "dist/index.js",

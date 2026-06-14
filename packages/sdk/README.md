@@ -1,8 +1,8 @@
-# @humanly/sdk
+# @humanlyai/sdk
 
 TypeScript SDK for the [Humanly](https://humanly.ai) AI agent testing platform.
 
-[![npm](https://img.shields.io/npm/v/@humanly/sdk)](https://www.npmjs.com/package/@humanly/sdk)
+[![npm](https://img.shields.io/npm/v/@humanlyai/sdk)](https://www.npmjs.com/package/@humanlyai/sdk)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ---
