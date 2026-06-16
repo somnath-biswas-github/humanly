@@ -4,9 +4,12 @@
 
 Run regression suites, evaluate conversations, and gate deployments on quality, compliance, and performance — all from your CI/CD pipeline. Self-host or use [Humanly.ai](https://humanly.ai).
 
+[![GitHub Stars](https://img.shields.io/github/stars/somnath-biswas-github/humanly?style=social)](https://github.com/somnath-biswas-github/humanly/stargazers)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![npm](https://img.shields.io/npm/v/@humanlyai/sdk)](https://www.npmjs.com/package/@humanlyai/sdk)
 [![Docker](https://img.shields.io/badge/docker-ready-blue)](https://hub.docker.com/r/humanlyai/humanly)
+
+> ⭐ If Humanly is useful to you, please **[star this repo](https://github.com/somnath-biswas-github/humanly/stargazers)** — it helps the project grow!
 
 ---
 
@@ -228,11 +231,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Good first issues are labelled [`good fi
 
 ## Roadmap
 
+- [x] Custom evaluation check plugin API
+- [x] Run streaming via SSE
 - [ ] Python SDK (`pip install humanly`)
 - [ ] Webhooks (run.completed, baseline.breached events)
 - [ ] Bitbucket Pipelines + CircleCI templates
-- [ ] Custom evaluation check plugin API
-- [ ] Run streaming via SSE
 - [ ] Community check registry
 
 ---
