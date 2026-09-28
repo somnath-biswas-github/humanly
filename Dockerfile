@@ -1,34 +1,16 @@
-FROM node:20-alpine AS base
-WORKDIR /app
-
-# ── Install dependencies ───────────────────────────────────────────────────
-FROM base AS deps
-COPY package*.json ./
-RUN npm ci --frozen-lockfile
-
-# ── Build ─────────────────────────────────────────────────────────────────
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build
-
-# ── Production image ──────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
-WORKDIR /app
+WORKDIR /opt/humanly
 ENV NODE_ENV=production
 
-# Install only production dependencies
-COPY package*.json ./
-RUN npm ci --frozen-lockfile --omit=dev
+# The release includes a server bundle, so a clean Docker build has no package
+# manager or registry dependency.
+COPY dist/server.cjs ./server.cjs
+COPY migrations ./migrations
+COPY LICENSE COPYING ./
 
-# Copy built assets
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/shared ./shared
+# Writable mount point for future file-backed test artifacts.
+RUN mkdir -p /opt/humanly/uploads && chown -R node:node /opt/humanly/uploads
 
-# Uploads volume mount point
-RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
-
-# Run as non-root
 USER node
 
 EXPOSE 5000
@@ -36,4 +18,4 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD wget -qO- http://localhost:5000/health || exit 1
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "server.cjs"]

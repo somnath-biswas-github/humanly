@@ -1,143 +1,61 @@
 ---
-title: Self-Hosting Guide
-description: Run Humanly on your own infrastructure
+title: Self-hosting
+description: Environment, storage, health, migration, and upgrade guidance
 ---
 
-## Requirements
+# Self-hosting
 
-| Component | Minimum | Recommended |
-|---|---|---|
-| RAM | 2 GB | 4 GB |
-| CPU | 1 core | 2 cores |
-| Disk | 10 GB | 20 GB |
-| Docker | 24+ | latest |
-| Docker Compose | v2 | v2 |
+## Environment variables
 
-## Quick setup
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `HUMANLY_API_KEY` | Yes | Authenticates every `/v1` request |
+| `POSTGRES_PASSWORD` | Recommended | Changes the Compose database password |
+| `HUMANLY_PORT` | No | Host port; defaults to 5000 |
+| `HUMANLY_ALLOW_PRIVATE_CONNECTORS` | No | Allows private targets only for deliberate local testing |
+| `DATABASE_URL` | Manual installs | PostgreSQL connection outside Compose |
+| `PORT` | No | Container/server port; defaults to 5000 |
+
+Keep `HUMANLY_ALLOW_PRIVATE_CONNECTORS=false` for a network-reachable
+deployment. Add outbound firewall rules as an additional control.
+
+## Startup and migrations
+
+`docker compose up --build` starts PostgreSQL and the Humanly service. The
+service retries database readiness and applies migration files from
+`migrations/` before accepting traffic.
+
+To run migrations manually:
 
 ```bash
-git clone https://github.com/somnath-biswas-github/humanly.git
-cd humanly
-cp .env.example .env
-# Edit .env — see Environment Variables below
-docker compose up -d
+npm ci
+npm run migrate
 ```
 
-The app starts on port 5000. First startup takes ~30 seconds (database migrations run automatically).
+## Health
 
-Check it's healthy:
+`GET /health` checks PostgreSQL and returns:
 
-```bash
-curl http://localhost:5000/health
-# {"status":"ok"}
-```
+- HTTP 200 and `ready: true` when the service is ready
+- HTTP 503 and `ready: false` when PostgreSQL is unavailable
 
-## Environment Variables
+The Docker image and Compose service use this endpoint for health checks.
 
-### Required
+## Persistence
 
-| Variable | Description |
-|---|---|
-| `OPENAI_API_KEY` | Used for synthetic user generation and evaluation verdicts |
-| `SESSION_SECRET` | Random string for signing sessions — generate with `openssl rand -hex 32` |
+Compose stores PostgreSQL data in the `postgres_data` named volume and reserves
+an `uploads` volume for future file-backed artifacts.
 
-### Optional — Email
+## Upgrade
 
-| Variable | Description |
-|---|---|
-| `SENDGRID_API_KEY` | Required for password reset emails |
-| `SENDGRID_FROM_EMAIL` | Sender address for emails |
-
-### Optional — Auth
-
-| Variable | Description |
-|---|---|
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
-| `LINKEDIN_CLIENT_ID` | LinkedIn OAuth |
-| `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth |
-
-### Optional — Billing
-
-| Variable | Description |
-|---|---|
-| `STRIPE_SECRET_KEY` | Stripe secret key — only needed if enabling billing |
-| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
-
-## Persistent data
-
-| Data | Storage |
-|---|---|
-| Database | Named Docker volume `humanly_postgres_data` |
-| Uploaded documents | Bind-mounted directory `./uploads` |
-
-Both persist across container restarts and upgrades.
-
-## Upgrading
+Back up PostgreSQL first, then:
 
 ```bash
 git pull
-docker compose build --no-cache
+docker compose build
 docker compose up -d
+docker compose logs app
+curl http://localhost:5000/health
 ```
 
-Database migrations run automatically on startup. No manual migration step needed.
-
-## Custom port
-
-To run on a port other than 5000, edit `docker-compose.yml`:
-
-```yaml
-ports:
-  - "8080:5000"  # external:internal
-```
-
-Or set the `PORT` environment variable (default: 5000).
-
-## Running behind a reverse proxy
-
-If running behind Nginx or Caddy, set `NODE_ENV=production` and configure your proxy to forward the `X-Forwarded-For` and `X-Forwarded-Proto` headers. Example Nginx config:
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name humanly.yourdomain.com;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
-```
-
-## External PostgreSQL
-
-To use an external PostgreSQL instance instead of the Docker-managed one, override `DATABASE_URL` in `.env`:
-
-```bash
-DATABASE_URL=postgresql://user:password@your-db-host:5432/humanly
-```
-
-Then remove the `postgres` service from `docker-compose.yml` and remove the `depends_on` block from the `app` service.
-
-## Health check
-
-```
-GET /health
-```
-
-Returns `{"status":"ok"}` when the app is running and the database is reachable. Use this for uptime monitoring and load balancer health checks.
-
-## Production checklist
-
-- [ ] `SESSION_SECRET` is a long random string (not the placeholder)
-- [ ] `NODE_ENV=production` is set
-- [ ] Running behind HTTPS (self-signed is fine for internal use; Let's Encrypt for public)
-- [ ] `./uploads` volume is backed up regularly
-- [ ] `humanly_postgres_data` volume is backed up regularly
-- [ ] Set resource limits in `docker-compose.yml` for production workloads
+Review [CHANGELOG.md](../CHANGELOG.md) for breaking changes before upgrading.

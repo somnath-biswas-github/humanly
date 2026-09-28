@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title description">
+  <title id="title">Humanly OSS regression report</title>
+  <desc id="description">A report from the included demo showing a baseline score of one, a regression score of zero, and a failed non-empty-response check.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#160d2d"/>
+      <stop offset="1" stop-color="#291453"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#090510" flood-opacity=".32"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="720" fill="url(#background)"/>
+  <circle cx="1080" cy="85" r="180" fill="#7c3aed" opacity=".14"/>
+  <circle cx="95" cy="690" r="210" fill="#f59e0b" opacity=".08"/>
+
+  <text x="70" y="70" fill="#c4b5fd" font-family="Inter, ui-sans-serif, system-ui" font-size="20" font-weight="700" letter-spacing="2">HUMANLY OSS · DEMO REPORT</text>
+  <text x="70" y="125" fill="#ffffff" font-family="Inter, ui-sans-serif, system-ui" font-size="44" font-weight="750">Regression detected</text>
+  <text x="70" y="160" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui" font-size="20">The intentionally empty agent response breached the passing baseline.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="205" width="1060" height="425" rx="24" fill="#ffffff"/>
+  </g>
+
+  <text x="110" y="257" fill="#475569" font-family="Inter, ui-sans-serif, system-ui" font-size="15" font-weight="700" letter-spacing="1.4">RUN SUMMARY</text>
+  <rect x="947" y="229" width="140" height="42" rx="21" fill="#fee2e2"/>
+  <circle cx="975" cy="250" r="7" fill="#dc2626"/>
+  <text x="994" y="257" fill="#991b1b" font-family="Inter, ui-sans-serif, system-ui" font-size="16" font-weight="750">BREACH</text>
+
+  <rect x="110" y="292" width="294" height="132" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="136" y="327" fill="#64748b" font-family="Inter, ui-sans-serif, system-ui" font-size="15">Baseline score</text>
+  <text x="136" y="388" fill="#166534" font-family="Inter, ui-sans-serif, system-ui" font-size="48" font-weight="760">1.00</text>
+
+  <rect x="453" y="292" width="294" height="132" rx="16" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="479" y="327" fill="#9a3412" font-family="Inter, ui-sans-serif, system-ui" font-size="15">Regression score</text>
+  <text x="479" y="388" fill="#c2410c" font-family="Inter, ui-sans-serif, system-ui" font-size="48" font-weight="760">0.00</text>
+
+  <rect x="796" y="292" width="291" height="132" rx="16" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="822" y="327" fill="#991b1b" font-family="Inter, ui-sans-serif, system-ui" font-size="15">Baseline delta</text>
+  <text x="822" y="388" fill="#dc2626" font-family="Inter, ui-sans-serif, system-ui" font-size="48" font-weight="760">−1.00</text>
+
+  <text x="110" y="475" fill="#475569" font-family="Inter, ui-sans-serif, system-ui" font-size="15" font-weight="700" letter-spacing="1.4">CHECK RESULTS</text>
+  <rect x="110" y="495" width="977" height="94" rx="14" fill="#f8fafc" stroke="#e2e8f0"/>
+  <circle cx="145" cy="542" r="16" fill="#fee2e2"/>
+  <path d="M138 535l14 14m0-14l-14 14" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+  <text x="178" y="535" fill="#0f172a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" font-weight="700">non_empty_response</text>
+  <text x="178" y="562" fill="#64748b" font-family="Inter, ui-sans-serif, system-ui" font-size="15">Agent returned HTTP 200 or an empty response.</text>
+  <rect x="979" y="521" width="76" height="38" rx="19" fill="#fee2e2"/>
+  <text x="999" y="546" fill="#991b1b" font-family="Inter, ui-sans-serif, system-ui" font-size="14" font-weight="800">FAIL</text>
+
+  <text x="70" y="681" fill="#a78bfa" font-family="Inter, ui-sans-serif, system-ui" font-size="17" font-weight="700">npm run demo</text>
+  <text x="224" y="681" fill="#94a3b8" font-family="Inter, ui-sans-serif, system-ui" font-size="17">· deterministic · no external AI provider required</text>
+</svg>

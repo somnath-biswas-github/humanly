@@ -1,0 +1,31 @@
+{
+  "name": "@humanlyai/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI for Humanly OSS HTTP-agent test runs",
+  "type": "module",
+  "bin": {
+    "humanly": "./dist/index.cjs"
+  },
+  "main": "./dist/index.cjs",
+  "files": ["dist"],
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.cjs --banner:js='#!/usr/bin/env node'",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": ["humanly", "agent-testing", "cli"],
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/somnath-biswas-github/humanly.git",
+    "directory": "packages/cli"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.6.3"
+  }
+}

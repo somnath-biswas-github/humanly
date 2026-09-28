@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/somnath-biswas-github/humanly/security/advisories/new
+    about: Report security issues privately. Do not open a public issue.
+  - name: Humanly Studio support
+    url: https://humanly.ai
+    about: Questions about the hosted Studio product belong with Humanly Studio.

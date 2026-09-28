@@ -1,9 +1,9 @@
-node_modules
+packages/sdk/node_modules
+packages/cli/node_modules
 .git
 .env
 .env.*
 uploads/
-dist/
 coverage/
 *.log
 .DS_Store
@@ -12,7 +12,5 @@ replit.nix
 .cache
 .local
 .upm
-README.md
-CONTRIBUTING.md
-.github/
-oss-scaffold/
+npm-debug.log*
+humanly-results/

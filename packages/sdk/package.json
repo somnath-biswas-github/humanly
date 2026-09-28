@@ -1,33 +1,36 @@
 {
   "name": "@humanlyai/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1-oss.0",
   "description": "TypeScript SDK for the Humanly AI agent testing platform",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "LICENSE"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepack": "node ../../scripts/package-license.mjs copy",
+    "postpack": "node ../../scripts/package-license.mjs remove"
   },
   "keywords": ["ai", "agent", "testing", "regression", "ci-cd", "humanly"],
   "author": "Humanly",
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
     "url": "https://github.com/somnath-biswas-github/humanly.git",
     "directory": "packages/sdk"
   },
-  "homepage": "https://humanly.ai/docs/sdk",
+  "homepage": "https://github.com/somnath-biswas-github/humanly#readme",
   "devDependencies": {
+    "@types/node": "^20.19.27",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0"
   }

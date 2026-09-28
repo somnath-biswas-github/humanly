@@ -5,6 +5,8 @@ node_modules/
 
 # Build outputs
 dist/
+!dist/
+!dist/server.cjs
 build/
 .vite/
 *.tsbuildinfo
@@ -36,6 +38,8 @@ Thumbs.db
 
 # Testing
 coverage/
+demo-output/
+packages/*/LICENSE
 
 # Docker
 .docker/

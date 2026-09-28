@@ -1,112 +1,92 @@
-# Contributing to Humanly
+# Contributing to Humanly OSS
 
-Thanks for your interest in contributing. This guide will get you set up quickly.
+Thank you for helping improve Humanly OSS.
 
----
+Please read the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities
+privately according to [SECURITY.md](SECURITY.md).
 
-## Project Structure
+## Repository structure
 
-```
+```text
 humanly/
-├── client/          # React frontend (Vite + TypeScript)
-├── server/          # Express backend (TypeScript ESM)
-├── shared/          # Shared types and Drizzle schema
+├── src/                  # Express API, evaluator, and database code
+├── migrations/           # Ordered PostgreSQL migrations
 ├── packages/
-│   └── sdk/         # @humanly/sdk TypeScript SDK
-├── python_agents/   # Demo Python agents (FastAPI)
+│   ├── sdk/              # @humanlyai/sdk TypeScript SDK
+│   ├── cli/              # Source-only CLI package
+│   └── python-sdk/       # Source-only Python client
+├── scripts/              # Demo, link checks, and smoke tests
+├── docs/                 # Product and self-hosting documentation
 ├── docker-compose.yml
 └── Dockerfile
 ```
 
----
+Humanly Studio is proprietary and is not part of this repository. Contributions
+must not copy Studio-only source, credentials, customer data, or generated
+workspace files into OSS.
 
-## Local Development Setup
+## Development setup
 
-### Prerequisites
+Requirements:
 
 - Node.js 20+
-- PostgreSQL 15+ (or Docker)
-- OpenAI API key
-
-### Steps
+- PostgreSQL 16, or Docker Compose v2
 
 ```bash
-# 1. Clone and install
 git clone https://github.com/somnath-biswas-github/humanly.git
 cd humanly
-npm install
-
-# 2. Set up environment
+npm ci
 cp .env.example .env
-# Edit .env — set DATABASE_URL, OPENAI_API_KEY, SESSION_SECRET
+```
 
-# 3. Start development server
+For local TypeScript development, set `DATABASE_URL` and
+`HUMANLY_API_KEY`, then:
+
+```bash
+npm run migrate
 npm run dev
 ```
 
-The dev server starts on port 5000. The frontend and backend are served together.
-
-### Using Docker for local dev
+For Docker:
 
 ```bash
-cp .env.example .env
-docker compose up postgres -d   # start just the database
-npm run dev                      # run app locally against Docker postgres
+docker compose up --build
 ```
 
----
+## Required checks
 
-## Making Changes
+Run before opening a pull request:
 
-### Backend
+```bash
+npm ci
+npm run verify
 
-- Routes live in `server/routes.ts`
-- Storage interface in `server/storage.ts`
-- Database schema in `shared/schema.ts`
-- After changing the schema, run: `npm run db:push`
+npm --prefix packages/sdk ci
+npm --prefix packages/sdk run build
+npm --prefix packages/sdk run lint
 
-### Frontend
+npm --prefix packages/cli ci
+npm --prefix packages/cli run build
+```
 
-- Pages in `client/src/pages/`
-- Shared components in `client/src/components/`
-- Register new pages in `client/src/App.tsx`
+`npm run verify` performs the server typecheck, evaluator tests, release bundle,
+and internal documentation-link check. The self-hosted GitHub Actions workflow
+also performs a clean Docker build, waits for `/health`, verifies migrations,
+and exercises the API and packaged clients.
 
-### SDK
+## Database changes
 
-- Source in `packages/sdk/src/`
-- Run `npm run build` inside `packages/sdk/` before testing
+Add an ordered SQL file under `migrations/`. Migrations must be idempotent at
+the release level and must not depend on interactive tools. Test both a new
+database and an upgrade from the prior release.
 
----
+## Pull requests
 
-## Pull Request Guidelines
+- Keep each pull request focused.
+- Add or update tests for behavioural changes.
+- Update documentation for public API or deployment changes.
+- Use conventional commit-style titles where practical.
+- Complete the pull-request template.
+- Never commit `.env`, API keys, customer data, or generated demo output.
 
-- **One feature or fix per PR** — keep PRs small and focused
-- **Branch naming:** `feat/description`, `fix/description`, `docs/description`
-- **Tests:** add tests for new evaluation logic if applicable
-- **Commit style:** use [Conventional Commits](https://www.conventionalcommits.org/)
-  - `feat: add webhook delivery dashboard`
-  - `fix: handle empty LLM trace gracefully`
-  - `docs: update AgentConnector spec`
-- **Fill in the PR template** — link to any relevant issue
-
----
-
-## Reporting Issues
-
-Use the issue templates:
-- **Bug report** — unexpected behaviour, errors, crashes
-- **Feature request** — new functionality or improvements
-
----
-
-## Code Style
-
-- TypeScript strict mode throughout
-- ESLint + Prettier (run `npm run lint`)
-- No `any` types without a comment explaining why
-
----
-
-## Questions?
-
-Open a [Discussion](https://github.com/somnath-biswas-github/humanly/discussions) for questions about architecture, integration patterns, or anything else.
+The [roadmap](docs/ROADMAP.md) includes issue-ready contribution candidates.

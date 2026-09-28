@@ -1,0 +1,28 @@
+{
+  "status": "completed",
+  "overallScore": 0,
+  "passRate": 0,
+  "conversationCount": 1,
+  "baselineBreach": true,
+  "baselineDelta": -1,
+  "conversations": [
+    {
+      "personaName": "Curious customer",
+      "turnCount": 1,
+      "overallScore": 0,
+      "passed": false,
+      "checkScores": [
+        {
+          "checkName": "non_empty_response",
+          "score": 0,
+          "passed": false,
+          "explanation": "Agent returned HTTP 200 or an empty response."
+        }
+      ],
+      "request": {
+        "message": "[DEMO_FAIL] Return an intentionally empty response."
+      },
+      "response": ""
+    }
+  ]
+}

@@ -1,11 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Humanly",
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "favicon": "/favicon.ico",
+  "name": "Humanly OSS",
   "colors": {
     "primary": "#7c3aed",
     "light": "#a78bfa",
@@ -13,13 +8,13 @@
   },
   "topbarLinks": [
     {
-      "name": "humanly.ai",
-      "url": "https://humanly.ai"
+      "name": "GitHub",
+      "url": "https://github.com/somnath-biswas-github/humanly"
     }
   ],
   "topbarCtaButton": {
-    "name": "Get Started Free",
-    "url": "https://humanly.ai"
+    "name": "Self-host",
+    "url": "https://github.com/somnath-biswas-github/humanly#quick-start"
   },
   "tabs": [
     {
@@ -41,13 +36,14 @@
       ]
     },
     {
-      "group": "Core Concepts",
+      "group": "Supported concepts",
       "pages": [
         "docs/core-concepts/agents-personas",
+        "docs/core-concepts/connectors",
         "docs/core-concepts/test-suites",
         "docs/core-concepts/evaluation-checks",
+        "docs/workflow-evaluation",
         "docs/core-concepts/baselines",
-        "docs/core-concepts/connectors",
         "docs/core-concepts/llm-traces"
       ]
     },
@@ -55,30 +51,21 @@
       "group": "Guides",
       "pages": [
         "docs/guides/first-test-run",
-        "docs/guides/ci-cd",
+        "docs/guides/agent-connector-setup",
         "docs/guides/regression-baselines",
-        "docs/guides/agent-connector-setup"
+        "docs/guides/ci-cd"
       ]
     },
     {
       "group": "TypeScript SDK",
       "pages": [
-        "sdk/typescript/overview",
-        "sdk/typescript/trigger-run",
-        "sdk/typescript/wait-for-run",
-        "sdk/typescript/baselines",
-        "sdk/typescript/resources"
+        "sdk/typescript/overview"
       ]
     },
     {
       "group": "REST API",
       "pages": [
-        "sdk/api/overview",
-        "sdk/api/authentication",
-        "sdk/api/runs",
-        "sdk/api/baselines",
-        "sdk/api/agents",
-        "sdk/api/connectors"
+        "sdk/api/overview"
       ]
     }
   ],

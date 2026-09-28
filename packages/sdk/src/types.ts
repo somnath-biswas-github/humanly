@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  @humanly/sdk — Type definitions
+//  @humanlyai/sdk — Type definitions
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface HumanlyClientOptions {
   /** Your Humanly API key (prefix: hmnly_) */
   apiKey: string;
-  /** Base URL of your Humanly instance. Defaults to https://humanly.ai */
+  /** Base URL of your Humanly OSS instance. Defaults to http://localhost:5000 */
   baseUrl?: string;
   /** Request timeout in milliseconds. Defaults to 30000 */
   timeout?: number;
@@ -19,6 +19,12 @@ export interface Agent {
   model: string;
   systemPrompt: string;
   createdAt: string;
+}
+
+export interface CreateAgentOptions {
+  name: string;
+  systemPrompt?: string;
+  model?: string;
 }
 
 // ── Personas ─────────────────────────────────────────────────────────────────
@@ -41,6 +47,16 @@ export interface Connector {
   createdAt: string;
 }
 
+export interface CreateConnectorOptions {
+  name: string;
+  endpointUrl: string;
+  agentId?: string;
+  environment?: string;
+  authType?: "none" | "bearer" | "api_key";
+  authValue?: string;
+  timeoutMs?: number;
+}
+
 // ── Test Suites ───────────────────────────────────────────────────────────────
 
 export interface Suite {
@@ -49,6 +65,17 @@ export interface Suite {
   description?: string;
   conversationCount: number;
   createdAt: string;
+}
+
+export interface CreateSuiteOptions {
+  name: string;
+  description?: string;
+  agentId?: string;
+  connectorId?: string;
+  personaId?: string;
+  conversationCount?: number;
+  testGoal?: string;
+  successCriteria?: string;
 }
 
 // ── Runs ─────────────────────────────────────────────────────────────────────
@@ -63,8 +90,8 @@ export type RunStatus =
 export interface TriggerRunOptions {
   /** ID of the test suite to run */
   suiteId: string;
-  /** ID of the AgentConnector to test against */
-  connectorId: string;
+  /** Optional override for the AgentConnector configured on the suite */
+  connectorId?: string;
   /** Optional: compare results against this baseline ID */
   baselineId?: string;
   /** Optional label for this run (e.g. git SHA, branch name) */

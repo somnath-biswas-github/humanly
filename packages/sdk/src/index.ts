@@ -1,14 +1,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  @humanly/sdk — Humanly AI Agent Testing Platform
+//  @humanlyai/sdk — Humanly AI Agent Testing Platform
 //  TypeScript SDK wrapping the v1 REST API
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type {
   HumanlyClientOptions,
   Agent,
+  CreateAgentOptions,
   Persona,
   Connector,
+  CreateConnectorOptions,
   Suite,
+  CreateSuiteOptions,
   Run,
   RunStatus,
   Report,
@@ -23,9 +26,12 @@ export type {
 import type {
   HumanlyClientOptions,
   Agent,
+  CreateAgentOptions,
   Persona,
   Connector,
+  CreateConnectorOptions,
   Suite,
+  CreateSuiteOptions,
   Run,
   Report,
   Baseline,
@@ -33,7 +39,7 @@ import type {
   CreateBaselineOptions,
 } from "./types.js";
 
-const DEFAULT_BASE_URL = "https://humanly.ai";
+const DEFAULT_BASE_URL = "http://localhost:5000";
 const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_POLL_INTERVAL = 3_000;
 const DEFAULT_POLL_TIMEOUT = 600_000; // 10 minutes
@@ -117,6 +123,11 @@ export class HumanlyClient {
 
   // ── Agents ────────────────────────────────────────────────────────────────
 
+  /** Create a logical agent to associate with a connector and suite. */
+  async createAgent(options: CreateAgentOptions): Promise<Agent> {
+    return this.request<Agent>("POST", "/v1/agents", options);
+  }
+
   /**
    * List all agents in your workspace.
    */
@@ -135,6 +146,11 @@ export class HumanlyClient {
 
   // ── Connectors ────────────────────────────────────────────────────────────
 
+  /** Create an HTTP AgentConnector. */
+  async createConnector(options: CreateConnectorOptions): Promise<Connector> {
+    return this.request<Connector>("POST", "/v1/connectors", options);
+  }
+
   /**
    * List all AgentConnectors in your workspace.
    */
@@ -143,6 +159,11 @@ export class HumanlyClient {
   }
 
   // ── Suites ────────────────────────────────────────────────────────────────
+
+  /** Create a repeatable HTTP-agent test suite. */
+  async createSuite(options: CreateSuiteOptions): Promise<Suite> {
+    return this.request<Suite>("POST", "/v1/suites", options);
+  }
 
   /**
    * List all test suites in your workspace.
