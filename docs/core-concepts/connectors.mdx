@@ -34,7 +34,8 @@ answers.
 The default suite evaluator checks only HTTP success and a non-empty answer.
 It does not evaluate RAG factual correctness, source recall, groundedness or
 answer completeness. A successful default check must not be interpreted as
-validation of those properties. Scripted workflow checks are a separate API.
+validation of those properties. Scripted workflow checks and
+[semantic RAG evaluation](../rag-evaluation.md) are separate APIs.
 
 Connector authentication can forward a bearer token or `X-API-Key`. Treat
 connector credentials as secrets.

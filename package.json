@@ -17,6 +17,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "rag": "tsx src/rag-cli.ts",
     "workflow": "tsx src/workflow-cli.ts",
     "workflow:fixture": "tsx scripts/workflow-fixture.ts",
     "build": "npm run check && npm run bundle",

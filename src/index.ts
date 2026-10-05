@@ -14,6 +14,9 @@ import { migrate, pool, closeDb } from "./db.js";
 import { evaluateAgentResponse } from "./evaluator.js";
 import { evaluateWorkflow, runWorkflow, validateWorkflowCase } from "./workflow.js";
 import { workflowExample } from "./workflow-examples.js";
+import { ragExample } from "./rag-example.js";
+import { ragRunHandler } from "./rag-routes.js";
+import { configuredRagJudge } from "./rag-judge.js";
 import type { ConversationResult, Report, RunStatus } from "./types.js";
 
 const app = express();
@@ -262,6 +265,31 @@ app.post("/v1/suites", requireApiKey("suites:write"), asyncRoute(async (req, res
 app.get("/v1/suites", requireApiKey("suites:read"), asyncRoute(async (_req, res) => {
   const result = await pool.query("SELECT * FROM suites ORDER BY created_at DESC");
   res.json(result.rows.map(publicSuite));
+}));
+
+app.get("/v1/rag/examples", requireApiKey("suites:read"), (_req, res) => res.json({ fixed: ragExample(), faulty: ragExample(true) }));
+app.post("/v1/rag/runs", requireApiKey("runs:write"), ragRunHandler({
+  judge: configuredRagJudge,
+  connector: async connectorId => {
+    const connector = (await pool.query("SELECT * FROM connectors WHERE id=$1", [connectorId])).rows[0];
+    if (!connector) return undefined;
+    return async request => {
+      const headers: Record<string, string> = { "content-type": "application/json" };
+      if (connector.auth_type === "bearer" && connector.auth_value) headers.authorization = `Bearer ${connector.auth_value}`;
+      if (connector.auth_type === "api_key" && connector.auth_value) headers["x-api-key"] = connector.auth_value;
+      const response = await postJsonToConnector({
+        endpointUrl: connector.endpoint_url, headers, body: JSON.stringify(request),
+        timeoutMs: Math.min(connector.timeout_ms, 30000),
+        allowPrivate: process.env.HUMANLY_ALLOW_PRIVATE_CONNECTORS === "true",
+      });
+      if (!response.ok) throw new Error(`Agent HTTP ${response.status}`);
+      return JSON.parse(response.body);
+    };
+  },
+  save: async report => {
+    await pool.query("INSERT INTO runs (id,status,label,overall_score,report,completed_at) VALUES ($1,'completed',$2,$3,$4,NOW())",
+      [report.runId, report.suite.name, report.overallScore, JSON.stringify(report)]);
+  },
 }));
 
 app.get("/v1/workflow/examples", requireApiKey("suites:read"), (_req,res) => res.json({fixed:workflowExample(),faulty:workflowExample(true)}));

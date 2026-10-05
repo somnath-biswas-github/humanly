@@ -6,6 +6,14 @@ All notable changes to Humanly OSS are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Standalone RAG API and CLI with configurable OpenAI-compatible judge provider,
+  source recall, semantic findings, strict evidence handling and fail-closed gates.
+  No Studio account or hosted Humanly service is required.
+- Uploaded and live-agent RAG runs, persisted API reports, fixed/faulty examples,
+  bounded judge transport, and controlled-judge API/CLI regression coverage.
+
 ### Fixed
 
 - Default suite evaluator now recognises `reply`, `content`, `text` and `answer`

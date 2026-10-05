@@ -40,6 +40,7 @@ and richer synthetic-user evaluation.
 | Self-hosted with Docker and PostgreSQL | Hosted at [humanly.ai](https://humanly.ai) |
 | REST API plus TypeScript SDK and CLI source | Visual, no-code test creation and analysis |
 | Legacy one-turn suites plus scripted multi-turn L1–L5 workflows | LLM-generated multi-turn synthetic users and the broader evaluation catalog |
+| Standalone RAG evaluation with your own judge provider | Managed RAG evaluation and visual reports |
 | AGPL-3.0-or-later | Proprietary hosted product |
 
 ## Why Humanly
@@ -65,8 +66,9 @@ and richer synthetic-user evaluation.
 - Docker Compose v2
 - A free local port (5000 by default)
 
-No OpenAI key, Studio account, or session secret is required for this OSS
-release.
+No model-provider key, Studio account, or session secret is required for the
+default checks or scripted workflows. Optional semantic RAG evaluation uses
+your own configured judge provider; see [RAG setup](docs/rag-evaluation.md).
 
 ```bash
 git clone https://github.com/somnath-biswas-github/humanly.git
@@ -150,7 +152,8 @@ order wins; a blank string fails even if a later field contains text:
 
 The default suite check only verifies HTTP success and non-empty response text.
 A pass does **not** establish factual correctness, groundedness, retrieval recall,
-or answer completeness. RAG semantic evaluation is not included in OSS.
+or answer completeness. Use the separate [RAG evaluator](docs/rag-evaluation.md)
+for those checks.
 
 Create the connector through `POST /v1/connectors`:
 
@@ -252,6 +255,9 @@ Available in OSS v0.1:
   L3 state/target, L4 structured tool-outcome consistency and L5 progress/termination.
   See [workflow evaluation](docs/workflow-evaluation.md) for Studio/OSS parity,
   runtime evidence, runnable faulty/fixed fixtures and quality gates.
+- Standalone semantic RAG evaluation through API and CLI, using your own
+  OpenAI-compatible judge provider; no Studio account required.
+  See [RAG evaluation](docs/rag-evaluation.md) for setup, evidence and CI gates.
 - PostgreSQL persistence and automatic versioned migrations
 - Docker readiness health check
 - OSS-compatible TypeScript SDK, CLI, and Python SDK source
@@ -261,7 +267,7 @@ Not included in OSS v0.1:
 - The Humanly Studio web interface
 - LLM-generated multi-turn synthetic users
 - Studio’s evaluation-check catalog
-- RAG semantic evaluation, Studio's general LLM trace-scoring catalog, webhooks,
+- Studio's general LLM trace-scoring catalog, webhooks,
   teams, or billing. Structured workflow event evaluation is supported separately.
 
 ## Documentation
@@ -269,6 +275,7 @@ Not included in OSS v0.1:
 - [Quick start](docs/quickstart.mdx)
 - [Self-hosting](docs/self-hosting.mdx)
 - [AgentConnector guide](docs/guides/agent-connector-setup.mdx)
+- [Standalone RAG evaluation](docs/rag-evaluation.md)
 - [First test run](docs/guides/first-test-run.mdx)
 - [Regression baselines](docs/guides/regression-baselines.mdx)
 - [REST API](sdk/api/overview.mdx)
