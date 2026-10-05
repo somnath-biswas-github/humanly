@@ -138,14 +138,19 @@ Your agent exposes an HTTP endpoint. Humanly sends:
 }
 ```
 
-Return JSON with `response`, `message`, or `output`, or return non-empty plain
-text:
+Return JSON with `reply`, `response`, `message`, `content`, `text`, `answer`,
+or `output`, or return non-empty plain text. The first string field in that
+order wins; a blank string fails even if a later field contains text:
 
 ```json
 {
   "response": "Hello! How can I help?"
 }
 ```
+
+The default suite check only verifies HTTP success and non-empty response text.
+A pass does **not** establish factual correctness, groundedness, retrieval recall,
+or answer completeness. RAG semantic evaluation is not included in OSS.
 
 Create the connector through `POST /v1/connectors`:
 

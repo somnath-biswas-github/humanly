@@ -21,3 +21,28 @@ test("requires both a successful HTTP status and non-empty content", () => {
   assert.equal(evaluateAgentResponse(true, 200, '{"response":""}').passed, false);
   assert.equal(evaluateAgentResponse(false, 500, '{"response":"Error page"}').passed, false);
 });
+
+test("accepts reply and the workflow response aliases in the default evaluator", () => {
+  for (const key of ["reply", "response", "message", "content", "text", "answer", "output"]) {
+    const result = evaluateAgentResponse(true, 200, JSON.stringify({ [key]: "  Agent answer  " }));
+    assert.equal(result.responseText, "Agent answer", key);
+    assert.equal(result.passed, true, key);
+    assert.equal(evaluateAgentResponse(true, 200, JSON.stringify({ [key]: " \n " })).passed, false, key);
+    assert.equal(evaluateAgentResponse(false, 500, JSON.stringify({ [key]: "Agent answer" })).passed, false, key);
+  }
+});
+
+test("uses reply-first string precedence without hiding an empty answer", () => {
+  assert.equal(extractAgentResponse('{"reply":"Primary","response":"Fallback"}'), "Primary");
+  assert.equal(extractAgentResponse('{"reply":"","response":"Fallback"}'), "");
+  assert.equal(extractAgentResponse('{"reply":"  ","response":"Fallback"}'), "");
+  assert.equal(extractAgentResponse('{"reply":null,"response":42,"message":"Valid"}'), "Valid");
+  assert.equal(extractAgentResponse('{"reply":{"text":"Nested"},"output":"Legacy"}'), "Legacy");
+});
+
+test("JSON primitives and metadata alone cannot pass as agent answers", () => {
+  for (const body of ['null', 'true', '42', '""', '"  "', '[]', '{"sources":["document"]}']) {
+    assert.equal(evaluateAgentResponse(true, 200, body).passed, false, body);
+  }
+  assert.equal(extractAgentResponse('"  Plain JSON string  "'), "Plain JSON string");
+});

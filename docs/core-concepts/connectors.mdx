@@ -24,7 +24,17 @@ Supported response forms:
 { "response": "..." }
 ```
 
-`message` and `output` keys are also accepted, as is non-empty plain text.
+Accepted JSON fields, in precedence order: `reply`, `response`, `message`,
+`content`, `text`, `answer`, `output`. The first string value is used and trimmed.
+An empty/whitespace-only first string fails; later fields do not hide it.
+Non-string fields are skipped. A JSON string or non-empty plain text is also
+accepted; JSON arrays, numbers, booleans, null and metadata-only objects are not
+answers.
+
+The default suite evaluator checks only HTTP success and a non-empty answer.
+It does not evaluate RAG factual correctness, source recall, groundedness or
+answer completeness. A successful default check must not be interpreted as
+validation of those properties. Scripted workflow checks are a separate API.
 
 Connector authentication can forward a bearer token or `X-API-Key`. Treat
 connector credentials as secrets.

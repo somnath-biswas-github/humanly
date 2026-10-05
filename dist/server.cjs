@@ -28600,10 +28600,20 @@ function extractAgentResponse(body) {
   if (!trimmed) return "";
   try {
     const parsed = JSON.parse(trimmed);
-    if (parsed && typeof parsed === "object") {
-      const candidate = parsed.response ?? parsed.message ?? parsed.output;
+    if (typeof parsed === "string") return parsed.trim();
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      const candidate = [
+        parsed.reply,
+        parsed.response,
+        parsed.message,
+        parsed.content,
+        parsed.text,
+        parsed.answer,
+        parsed.output
+      ].find((value) => typeof value === "string");
       return typeof candidate === "string" ? candidate.trim() : "";
     }
+    return "";
   } catch {
   }
   return trimmed;

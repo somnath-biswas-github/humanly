@@ -6,6 +6,13 @@ All notable changes to Humanly OSS are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Default suite evaluator now recognises `reply`, `content`, `text` and `answer`
+  alongside existing response aliases, with workflow-compatible reply-first
+  precedence. Empty replies cannot be masked by fallback fields.
+- JSON primitives without answer text no longer pass the non-empty check.
+
 ### Planned
 
 - Additional deterministic evaluation checks
