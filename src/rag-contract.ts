@@ -98,6 +98,7 @@ export function validateAssessment(value: unknown, hasEvidence: boolean): assert
         finding.score < 0 || finding.score > 100 || !string(finding.explanation, 8000) ||
         !Array.isArray(finding.findings) || finding.findings.length > 100 ||
         !finding.findings.every((v: unknown) => string(v, 8000))) throw new Error(`Invalid judge ${key}`);
+    if (finding.score === 100 && finding.findings.length) throw new Error(`Contradictory judge ${key}`);
   }
   if (!["insufficient_evidence", "explicit_refusal", "substantive_answer", "disclaimer_with_answer"].includes(value.answerHandling.responseKind)) {
     throw new Error("Invalid judge response classification");

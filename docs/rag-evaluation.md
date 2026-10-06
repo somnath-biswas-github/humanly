@@ -25,6 +25,27 @@ strict. Missing expected sources are reported separately from missing answer fac
 There is no keyword-matching fallback for semantic checks. A model/provider
 failure is inconclusive and blocks the quality gate.
 
+### Prohibited-claim reliability
+
+The provider adapter now requests one verdict per prohibited claim: asserted,
+not_asserted or uncertain, with an explanation and exact answer quotation for
+asserted violations. Scores are calculated in code: any asserted violation scores
+zero; all not_asserted scores 100. Missing, duplicate, uncertain or invalid verdicts
+and fabricated quotations make the assessment inconclusive and block the gate.
+The quotation check verifies text provenance, not whether the interpretation is correct.
+Negating or quoting a claim is not necessarily endorsing it. There is no automatic
+substring-based semantic fallback and no advisory-mode bypass.
+
+Perfect scores with nonempty defect findings are rejected as inconsistent. This
+does not detect every contradiction in free-text explanations.
+
+External testing with Agent A and gpt-4o-mini reported that the overall evaluator
+caught five seeded faults, but prohibited-claim detection missed violations and
+varied on identical answers; one citation score contradicted its explanation.
+This motivated the revised contract, not a claim that it fixes real-model accuracy.
+The revision still needs calibration against the tester's raw suites and frozen
+answers, including positive, negative, negated, quoted and paraphrased controls.
+
 ## Configure your own judge
 
 For the CLI, install source dependencies with `npm ci`. It requires Node.js 20+,

@@ -228,10 +228,22 @@ test("provider adapter and CLI run end-to-end against a controlled HTTP judge (n
     const payload = JSON.parse(raw); payloads.push(payload);
     if (providerMode === "error") { res.writeHead(429); res.end("sensitive-provider-body"); return; }
     const input = JSON.parse(payload.messages[1].content);
-    const a = assessment();
+    const a = { ...assessment(), claimVerdicts: (input.case.prohibitedClaims ?? []).map((_: string, claimIndex: number) => ({
+      claimIndex, verdict: input.observation.answer.startsWith("Yes") ? "asserted" : "not_asserted",
+      quote: input.observation.answer, explanation: "Controlled provider verdict, not semantic calibration.",
+    })) };
     if (input.observation.answer.startsWith("Yes")) {
       a.referenceCorrectness.score = 0;
       a.expectedFactCoverage = { score: 50, explanation: "Missing exception.", findings: ["Opened electronics exception"] };
+    }
+    if (providerMode === "uncertain") a.claimVerdicts[0].verdict = "uncertain";
+    if (providerMode === "missing") a.claimVerdicts = [];
+    if (providerMode === "fabricated") {
+      a.claimVerdicts[0].verdict = "asserted";
+      a.claimVerdicts[0].quote = "A quotation not present in the agent answer.";
+    }
+    if (providerMode === "contradictory") {
+      a.citations = { score: 100, explanation: "Unsupported claim.", findings: ["Citation does not support answer."] };
     }
     res.setHeader("content-type", "application/json");
     res.end(JSON.stringify({ choices: [{ finish_reason: "stop", message: { content: providerMode === "malformed" ? "{}" : JSON.stringify(a) } }],
@@ -247,6 +259,17 @@ test("provider adapter and CLI run end-to-end against a controlled HTTP judge (n
     assert.equal(result.judge?.usage?.totalTokens, 50);
     assert.equal(payloads[0].response_format.json_schema.strict, true);
     assert.deepEqual(payloads[0].response_format.json_schema.schema, judgeSchema(true));
+    const faultyBundle = ragExample(true);
+    const faultyResult = await evaluateRag(faultyBundle.suite.cases[0], faultyBundle.observations.electronics, judge);
+    assert.equal(faultyResult.checks.prohibitedClaims?.score, 0);
+    for (const mode of ["uncertain", "missing", "fabricated", "contradictory"]) {
+      providerMode = mode;
+      const blocked = await evaluate(judge);
+      assert.equal(blocked.status, "inconclusive", mode);
+      assert.ok(blocked.errors.includes("judge_invalid_assessment"), mode);
+      assert.equal(blocked.usage?.totalTokens, 50);
+    }
+    providerMode = "normal";
     for (const faulty of [false, true]) {
       const bundle = join(dir, "bundle.json"), output = join(dir, "report.json");
       await writeFile(bundle, JSON.stringify(ragExample(faulty)));
