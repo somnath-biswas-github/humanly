@@ -1,3 +1,9 @@
+# Conversational testing entry point
+
+For synthetic users, conversational criteria, execution limits and replay,
+see [Conversational & Workflow Testing](conversational-testing.md).
+The existing scripted evidence-based L1–L5 contract below remains supported.
+
 # Workflow evaluation (L1–L5)
 
 Studio's **Workflow Evaluation** page and OSS's workflow API/CLI use the same

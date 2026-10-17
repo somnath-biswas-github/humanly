@@ -1,3 +1,4 @@
+import "dotenv/config";
 import {readFile,writeFile} from "node:fs/promises";
 import {randomUUID} from "node:crypto";
 import {evaluateWorkflow,runWorkflow,validateWorkflowCase} from "./workflow.js";
@@ -22,7 +23,7 @@ async function main(){
       return JSON.parse(response.body);
     },randomUUID());
   }
-  await writeFile(out,JSON.stringify(result,null,2));
+  await writeFile(mode==="evaluate"?(url??"workflow-report.json"):out,JSON.stringify(result,null,2));
   console.log(JSON.stringify(result.report,null,2));
   process.exitCode=result.report.status==="pass"?0:result.report.status==="fail"?1:2;
 }

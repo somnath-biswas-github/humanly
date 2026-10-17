@@ -17,6 +17,9 @@ import { workflowExample } from "./workflow-examples.js";
 import { ragExample } from "./rag-example.js";
 import { ragRunHandler } from "./rag-routes.js";
 import { configuredRagJudge } from "./rag-judge.js";
+import { conversationExample } from "./conversation.js";
+import { conversationRunHandler } from "./conversation-routes.js";
+import { configuredConversationModel } from "./conversation-model.js";
 import type { ConversationResult, Report, RunStatus } from "./types.js";
 
 const app = express();
@@ -289,6 +292,28 @@ app.post("/v1/rag/runs", requireApiKey("runs:write"), ragRunHandler({
   save: async report => {
     await pool.query("INSERT INTO runs (id,status,label,overall_score,report,completed_at) VALUES ($1,'completed',$2,$3,$4,NOW())",
       [report.runId, report.suite.name, report.overallScore, JSON.stringify(report)]);
+  },
+}));
+
+app.get("/v1/conversation/example", requireApiKey("suites:read"), (_req,res)=>res.json(conversationExample()));
+app.post("/v1/conversation/runs", requireApiKey("runs:write"), conversationRunHandler({
+  model:configuredConversationModel,
+  connector:async connectorId=>{
+    const connector=(await pool.query("SELECT * FROM connectors WHERE id=$1",[connectorId])).rows[0];
+    if(!connector)throw new Error("Connector not found");
+    return async request=>{
+      const headers:Record<string,string>={"content-type":"application/json"};
+      if(connector.auth_type==="bearer"&&connector.auth_value)headers.authorization=`Bearer ${connector.auth_value}`;
+      if(connector.auth_type==="api_key"&&connector.auth_value)headers["x-api-key"]=connector.auth_value;
+      const response=await postJsonToConnector({endpointUrl:connector.endpoint_url,headers,body:JSON.stringify(request),
+        timeoutMs:Math.min(connector.timeout_ms,120000),allowPrivate:process.env.HUMANLY_ALLOW_PRIVATE_CONNECTORS==="true"});
+      if(!response.ok)throw new Error("Agent request failed");
+      return JSON.parse(response.body);
+    };
+  },
+  save:async report=>{
+    await pool.query("INSERT INTO runs (id,status,label,overall_score,report,completed_at) VALUES ($1,'completed',$2,$3,$4,NOW())",
+      [report.runId,report.definition.name,report.overallScore===null?null:report.overallScore/100,JSON.stringify(report)]);
   },
 }));
 

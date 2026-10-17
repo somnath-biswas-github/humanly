@@ -39,7 +39,7 @@ and richer synthetic-user evaluation.
 | For developers and engineering teams | For product, design, QA, and engineering teams |
 | Self-hosted with Docker and PostgreSQL | Hosted at [humanly.ai](https://humanly.ai) |
 | REST API plus TypeScript SDK and CLI source | Visual, no-code test creation and analysis |
-| Legacy one-turn suites plus scripted multi-turn L1–L5 workflows | LLM-generated multi-turn synthetic users and the broader evaluation catalog |
+| Scripted and synthetic-user conversations, plus L1–L5 runtime checks | Managed synthetic-user runs with saved personas and the broader evaluation catalog |
 | Standalone RAG evaluation with your own judge provider | Managed RAG evaluation and visual reports |
 | AGPL-3.0-or-later | Proprietary hosted product |
 
@@ -47,12 +47,15 @@ and richer synthetic-user evaluation.
 
 - **Synthetic-user testing:** Humanly Studio exercises LLM-generated multi-turn
   behaviour instead of relying only on isolated prompts. That kind of synthetic
-  conversation remains on the OSS roadmap. The legacy OSS suite path performs
-  one-turn connector evaluations; the separate workflow runner supports
-  test-authored scripted multi-turn L1–L5 checks today.
-- **Behaviour and outcome evaluation:** OSS starts with a deterministic
-  non-empty-response check. Studio provides the broader set of available
-  evaluation checks.
+  conversation is also available through the standalone OSS
+  [conversation runner](docs/conversational-testing.md), with a configured
+  persona, scenario, weighted criteria and provider. Existing legacy `/v1/runs`
+  suites still perform one-turn connector evaluations; use the explicit
+  conversation or workflow runner for multi-turn testing.
+- **Behaviour and outcome evaluation:** the OSS conversation runner evaluates
+  configured rubrics and required thresholds. Legacy suites retain their
+  deterministic non-empty-response check. Studio has a broader criteria catalog;
+  identical scoring or automatic criteria interchange is not promised.
 - **Regression baselines:** save the score from a known run and detect later
   quality drops.
 - **CI/CD deployment gates:** retrieve a machine-readable report and fail a
