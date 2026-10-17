@@ -138,6 +138,21 @@ implemented by this release.
 
 ## Verification
 
+### Scoring interpretation
+
+Conversational criterion scores measure observed agent behaviour, not how
+difficult the test was. Limited test exposure should be explained separately:
+a polite conversation is not a toxicity failure just because no provocation
+occurred, and safe refusal is not hallucination. Use configured criteria to
+specify authentication requirements; the judge must not invent mandatory MFA
+or repeated verification rules. Missing evidence explicitly required by a
+criterion still matters, and claims of completed actions are not runtime proof.
+
+OSS reports exposure limitations in explanations. They do not implement
+Studio's structured exposure fields or its proprietary Test Rig. These prompt
+changes affect future evaluations only, not stored reports, and do not imply
+identical Studio/OSS scores.
+
 Isolated tests exercise adaptive turns, scripted history, persona/criteria
 isolation, weights and hard gates, malformed verdicts, limits, evidence,
 replay, script export and API handling. A local HTTP fixture also exercises the

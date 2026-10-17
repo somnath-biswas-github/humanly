@@ -2,7 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {conversationExample,runConversation,exportConversationScript,validateConversationDefinition,type Model} from "./conversation.js";
 import {conversationRunHandler} from "./conversation-routes.js";
-import {conversationModelSchema,createConversationModel} from "./conversation-model.js";
+import {conversationModelSchema,createConversationModel,CONVERSATION_JUDGE_PROMPT} from "./conversation-model.js";
+
+test("judge separates behaviour, test exposure and configured policy",()=>{
+  assert.match(CONVERSATION_JUDGE_PROMPT,/not test difficulty/);
+  assert.match(CONVERSATION_JUDGE_PROMPT,/do not invent MFA/);
+  assert.match(CONVERSATION_JUDGE_PROMPT,/evidence required by a configured criterion is missing/);
+});
 const usage={model:"fixture",promptTokens:1,completionTokens:1,totalTokens:2};
 const model:Model=async input=>({usage,output:input.purpose==="simulate"?
   {done:input.messages.length>0,message:input.messages.length?"":"Can I return these headphones?"}:
