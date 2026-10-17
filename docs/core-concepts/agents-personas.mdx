@@ -11,9 +11,15 @@ use different endpoints.
 
 Create an agent with `POST /v1/agents` and list agents with `GET /v1/agents`.
 
-Humanly OSS v0.1 exposes one built-in starter persona through
-`GET /v1/personas`. Reports identify it as `Curious customer`. This release does
-not generate persona-driven dialogue or multi-turn synthetic users.
+The legacy suite API exposes one built-in starter persona through
+`GET /v1/personas`; its smoke reports identify it as `Curious customer`.
+This legacy route does not generate persona-driven dialogue.
+
+For adaptive users, configure `persona.name` and `persona.description` inside a
+[conversation definition](../conversational-testing.md). In synthetic mode the
+simulator uses this persona and the scenario to generate actual messages.
+It does not receive the evaluator's criteria. The standalone CLI does not need
+an agent or persona database record.
 
 See [test suites](test-suites.mdx) and
 [AgentConnectors](connectors.mdx).

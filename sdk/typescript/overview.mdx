@@ -31,4 +31,7 @@ The client exposes create/list methods for agents, connectors, and suites;
 trigger/get/list methods for runs; report polling; persona listing; and
 create/get/list methods for baselines.
 
-The source in `packages/sdk` is built and packed in CI.
+These helpers target the legacy suite API. To start conversational, workflow or
+RAG evaluations, use their dedicated CLI or HTTP routes from the
+[selection guide](../../docs/choose-your-test.md); `triggerRun` does not select
+those runners. Build and pack this SDK source locally as shown above.

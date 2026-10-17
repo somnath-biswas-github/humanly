@@ -12,8 +12,9 @@ The default single-turn run path includes:
 Passes when:
 
 - The connector returns a successful HTTP status
-- The response contains non-whitespace text in `response`, `message`, or
-  `output`, or as a plain-text body
+- The response contains non-whitespace text in the first string field among
+  `reply`, `response`, `message`, `content`, `text`, `answer`, `output`, or as
+  a plain-text body. An earlier blank string fails even if a later field is populated.
 
 It fails with score 0 for non-success HTTP status codes, empty content,
 unsupported JSON response shapes, timeouts, or unreachable agents.
@@ -27,6 +28,17 @@ runtime evidence and evaluator-side expectations. Missing evidence is
 inconclusive and blocks the gate, not a pass.
 See [workflow evaluation](../workflow-evaluation.md) for schemas, API, CLI and
 provider-free faulty/fixed examples.
+
+## Model-based checks
+
+The [conversation runner](../conversational-testing.md) grades your configured
+criteria on a 0–100 scale with weights and required thresholds. Scripted inputs
+do not make model-based grading deterministic. Test exposure and observed
+behaviour are different questions; explanations should distinguish them.
+
+The [RAG runner](../rag-evaluation.md) has its own reference/evidence contract
+for grounding, factual coverage and answer quality. Do not substitute a
+non-empty-response pass for either kind of evaluation.
 
 The wider Humanly Studio LLM evaluation catalog is not included in this release.
 Additional deterministic OSS checks are on the

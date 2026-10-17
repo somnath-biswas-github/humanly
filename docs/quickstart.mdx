@@ -5,6 +5,17 @@ description: Start Humanly OSS from a clean clone with Docker Compose
 
 # Quick start
 
+Choose an entry point:
+
+- **No provider, no database:** [evaluate fixed/faulty workflow evidence](workflow-evaluation.md#quick-start--no-paid-providers)
+  with Node.js 20+ and `npm ci`.
+- **Scripted or synthetic conversations:** [configure the conversation runner](conversational-testing.md)
+  with your own model provider. Both modes use a judge.
+- **RAG:** [configure semantic evaluation](rag-evaluation.md) with reference data and your own judge.
+- **Persistent REST API:** use the Docker instructions below.
+
+See [choose your test](choose-your-test.md) for the capability and CI differences.
+
 ## Requirements
 
 - Docker Engine
@@ -38,5 +49,6 @@ curl http://localhost:5000/health
 
 A ready instance returns HTTP 200 with `"ready": true`.
 
-No OpenAI key or Studio account is required. Continue with the
-[first test run](guides/first-test-run.mdx).
+No model key or Studio account is required for server startup or the
+[first smoke test](guides/first-test-run.mdx). That test checks connectivity and
+non-empty text only. Conversational and semantic RAG judging need provider configuration.

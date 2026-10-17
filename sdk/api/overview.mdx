@@ -30,6 +30,23 @@ Authorization: Bearer <HUMANLY_API_KEY>
 | `GET` | `/v1/runs/:id/report` | Retrieve a completed report |
 | `POST`, `GET` | `/v1/baselines` | Create or list baselines |
 | `GET` | `/v1/baselines/:id` | Retrieve a baseline |
+| `GET` | `/v1/conversation/example` | Complete conversation-definition template |
+| `POST` | `/v1/conversation/runs` | Scripted/synthetic conversation or judge-only replay |
+| `GET` | `/v1/workflow/examples` | Fixed/faulty workflow cases |
+| `POST` | `/v1/workflow/runs` | Evaluate or execute evidence-backed workflow cases |
+| `GET` | `/v1/rag/examples` | Fixed/faulty RAG suites |
+| `POST` | `/v1/rag/runs` | Semantic RAG evaluation |
+
+The examples routes require `suites:read`, starting evaluations requires
+`runs:write`, and `GET /v1/runs/:id/report` requires `reports:read`.
+The newer POST routes return their runner-specific report; do not assume the
+legacy asynchronous run response or report schema.
+
+Request bodies and configuration:
+[conversation](../../docs/conversational-testing.md#http-api),
+[workflow](../../docs/workflow-evaluation.md),
+[RAG](../../docs/rag-evaluation.md).
+`POST /v1/runs` remains the legacy single-turn suite route.
 
 `GET /docs` returns the runtime route index. An OpenAPI document is planned but
 is not part of v0.1.

@@ -12,13 +12,14 @@ promise delivery dates.
 Record connector duration per conversation, allow a suite threshold in
 milliseconds, expose the check in reports, and test timeout and boundary cases.
 
-### Add multi-turn conversation execution
+### Unify suite configuration across runners
 
 **Labels:** `enhancement`, `evaluation`
 
-Extend suites with a bounded turn count, send prior messages through the
-AgentConnector `history` field, and retain backward compatibility with one-turn
-suites.
+Multi-turn execution already exists in the workflow and conversation runners,
+including synthetic-user generation. Future work can make configuration and
+report discovery more consistent across these and the legacy one-turn suites,
+without claiming existing payload interchange or changing historical reports.
 
 ### Export JUnit XML from the CLI
 

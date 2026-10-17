@@ -11,9 +11,9 @@ Humanly is an AI-agent evaluation and regression-testing product family.
 - **Humanly Studio** is the proprietary hosted visual product at
   [humanly.ai](https://humanly.ai).
 
-Humanly OSS v0.1 connects to an HTTP agent, sends a one-turn test goal, evaluates
-whether the agent returned a successful non-empty response, stores a report, and
-compares runs with saved baselines.
+Humanly OSS offers scripted or synthetic-user conversations, deterministic
+evidence-backed workflows, semantic RAG evaluation, and a legacy connector smoke
+test. [Choose your test](choose-your-test.md) before configuring a runner.
 
 The separate [workflow evaluation](workflow-evaluation.md) path supports scripted
 multi-turn L1–L5 tests with runtime evidence, shared deterministic checks, saved
@@ -27,15 +27,19 @@ reports and explicit pass/fail/inconclusive gates.
 - HTTP AgentConnector protocol
 - Deterministic `non_empty_response` evaluation
 - Scripted L1–L5 workflow evaluation through API and CLI
+- Scripted and adaptive synthetic-user conversations with configurable criteria,
+  thresholds, budgets, replay and script export
+- Standalone semantic RAG evaluation with your own judge provider
 - Reports and regression baselines
 - OSS-compatible TypeScript SDK source
 - CLI and Python SDK source
 
 ## Not included in v0.1
 
-The OSS release does not include the Studio interface, LLM-generated multi-turn
-synthetic users, Studio’s broader LLM evaluation catalog, RAG evaluation, general LLM trace
-analysis, webhooks, teams, or billing.
+The OSS release does not include the Studio interface, Studio’s broader
+evaluation catalog, general LLM trace analysis, webhooks, teams, or billing.
+Multi-turn conversational RAG and full Studio/OSS configuration interchange
+are not implemented. Similar testing concepts do not guarantee identical scores.
 
 Start with the [quick start](quickstart.mdx), then run the
 [included evaluation](guides/first-test-run.mdx).

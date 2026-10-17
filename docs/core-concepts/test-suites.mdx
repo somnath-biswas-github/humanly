@@ -28,5 +28,8 @@ Create a suite with `POST /v1/suites`, then start it with:
 }
 ```
 
-Multi-turn synthetic-user execution and configurable check selection are not in
-v0.1.
+These legacy suites do not execute synthetic users or grade the descriptive
+success-criteria field. Use [conversation definitions](../conversational-testing.md)
+for scripted/synthetic multi-turn execution with weighted criteria and thresholds,
+or [RAG suites](../rag-evaluation.md) for reference-based answer evaluation.
+These are distinct contracts, not interchangeable payloads for `POST /v1/runs`.

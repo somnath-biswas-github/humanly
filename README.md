@@ -1,14 +1,13 @@
 # Humanly
 
-### Regression testing for AI agents through synthetic users
+### Evaluate AI agents before release—and catch regressions in CI
 
-Humanly simulates realistic users, runs multi-turn conversations against
-your AI agent, evaluates the outcomes and detects regressions before deployment.
+Humanly OSS tests conversational behaviour, evidence-backed workflows and RAG
+answers. Use authored turns or adaptive synthetic users, inspect the findings,
+and block releases when your configured quality gate fails.
 
-[Try Humanly Studio](https://humanly.ai) · [Quick Start](#quick-start) · [Documentation](docs/quickstart.mdx)
+[Choose a test](docs/choose-your-test.md) · [Quick Start](#quick-start) · [Documentation](docs/introduction.mdx) · [Hosted Studio](https://humanly.ai)
 
-[![CI](https://github.com/somnath-biswas-github/humanly/actions/workflows/ci.yml/badge.svg)](https://github.com/somnath-biswas-github/humanly/actions/workflows/ci.yml)
-[![Self-hosted smoke test](https://github.com/somnath-biswas-github/humanly/actions/workflows/self-hosted-smoke.yml/badge.svg)](https://github.com/somnath-biswas-github/humanly/actions/workflows/self-hosted-smoke.yml)
 [![License: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0--or--later-7c3aed.svg)](LICENSE)
 [![Node.js 20+](https://img.shields.io/badge/node-%3E%3D20-339933.svg)](package.json)
 
@@ -22,15 +21,29 @@ drop._
 
 ```mermaid
 flowchart LR
-    A["Connect agent"] --> B["Simulate users"]
-    B --> C["Evaluate conversations"]
-    C --> D["Compare baseline"]
+    A["Choose a test and configure expectations"] --> B["Run against agent or evaluate evidence"]
+    B --> C["Inspect scores, findings and evidence gaps"]
+    C --> D["Apply the runner's quality gate"]
     D --> E["Pass or block deployment"]
 ```
 
-Humanly OSS v0.1 implements the connector, deterministic evaluation, report,
-baseline, and quality-gate path. Humanly Studio adds the hosted visual workflow
-and richer synthetic-user evaluation.
+OSS runs independently of Studio. Model-based evaluation uses your own provider;
+deterministic workflow checks need no judge. Studio adds hosted visual creation,
+managed execution and its broader evaluation catalog. Neither route guarantees
+production safety or identical scores.
+
+## Choose what to test
+
+| Your question | OSS runner | What you configure | Model provider? |
+| --- | --- | --- | --- |
+| Does the agent handle a realistic conversation well? | [Conversation](docs/conversational-testing.md), scripted or synthetic | User turns or persona; scenario; weighted criteria; thresholds and budgets | Yes: judge in both modes, simulator in synthetic mode |
+| Did it act on the right target, obtain approval and report tool outcomes honestly? | [Workflow L1–L5](docs/workflow-evaluation.md) | Scripted turns or captured runtime evidence; explicit action/state expectations | No judge; your agent may still use models |
+| Are answers grounded, correct and supported by retrieved evidence? | [RAG](docs/rag-evaluation.md) | Questions, reference answers/facts, retrieval evidence and thresholds | Yes for semantic judging |
+| Is the connector reachable and returning text? | Legacy single-turn suites | Endpoint, goal, count and optional baseline | No judge; this is only a smoke test |
+
+Conversational and workflow checks can be combined with `workflowChecks`.
+RAG currently evaluates independent questions, not multi-turn conversational RAG.
+See [the selection guide](docs/choose-your-test.md) for commands, setup and CI rules.
 
 ## Two ways to use Humanly
 
@@ -56,22 +69,35 @@ and richer synthetic-user evaluation.
   configured rubrics and required thresholds. Legacy suites retain their
   deterministic non-empty-response check. Studio has a broader criteria catalog;
   identical scoring or automatic criteria interchange is not promised.
-- **Regression baselines:** save the score from a known run and detect later
-  quality drops.
-- **CI/CD deployment gates:** retrieve a machine-readable report and fail a
-  pipeline when `baselineBreach` is `true`.
+- **Regression gates:** legacy suites support stored score baselines; the newer
+  runners use their own configured thresholds and evidence gates.
+- **CI/CD:** conversational, workflow and RAG CLI failures or inconclusive
+  results block CI. `baselineBreach` belongs to legacy suite reports, not every runner.
 
 ## Quick start
+
+**Fastest provider-free evaluation:** with Node.js 20+, clone this repository,
+run `npm ci`, then follow the [fixed/faulty workflow example](docs/workflow-evaluation.md#quick-start--no-paid-providers).
+It evaluates supplied evidence without Docker, PostgreSQL or provider keys;
+it is not a live-agent test.
+
+**For synthetic-user conversations:** follow the
+[conversation setup](docs/conversational-testing.md#standalone-oss-setup).
+CLI execution needs Node.js and a configured judge/simulator provider, not the API server.
+
+**For the persistent API:** use the Docker setup below.
 
 ### Prerequisites
 
 - Docker Engine
 - Docker Compose v2
 - A free local port (5000 by default)
+- Node.js 20+ and npm for host-side demo, CLI and SDK commands below
 
 No model-provider key, Studio account, or session secret is required for the
-default checks or scripted workflows. Optional semantic RAG evaluation uses
-your own configured judge provider; see [RAG setup](docs/rag-evaluation.md).
+default smoke checks or deterministic L1–L5 workflows. Conversational grading
+(including scripted conversations) and semantic RAG use your configured provider.
+See [conversation setup](docs/conversational-testing.md) and [RAG setup](docs/rag-evaluation.md).
 
 ```bash
 git clone https://github.com/somnath-biswas-github/humanly.git
@@ -102,8 +128,8 @@ Expected:
 }
 ```
 
-The exact first-start time depends on network and Docker cache state. The
-self-hosted CI workflow allows up to two minutes for readiness.
+The exact first-start time depends on network and Docker cache state.
+Local verification is not a claim that a GitHub Actions workflow has passed.
 
 ## Run the included evaluation
 
@@ -228,6 +254,11 @@ The CLI in [`packages/cli`](packages/cli) is also source-only in v0.1 and is
 
 ## CI/CD integration
 
+The example below applies to **legacy single-turn suites**. For the newer
+runners, use their CLI exit status and report gate; see the
+[CI/CD guide](docs/guides/ci-cd.mdx). Do not look for `baselineBreach` in
+conversation, workflow or RAG reports.
+
 Build the repository CLI, then use it as a deployment gate:
 
 ```bash
@@ -254,6 +285,8 @@ Available in OSS v0.1:
 - HTTP AgentConnector with bearer and API-key forwarding
 - Private, loopback, link-local, and reserved destination blocking by default
 - One-turn deterministic non-empty-response evaluation (existing default)
+- Scripted or adaptive synthetic-user conversational evaluation with weighted
+  criteria, required thresholds, execution budgets, judge-only replay and script export
 - Scripted multi-turn workflow evaluation: L1 policy/action, L2 approval,
   L3 state/target, L4 structured tool-outcome consistency and L5 progress/termination.
   See [workflow evaluation](docs/workflow-evaluation.md) for Studio/OSS parity,
@@ -268,7 +301,6 @@ Available in OSS v0.1:
 Not included in OSS v0.1:
 
 - The Humanly Studio web interface
-- LLM-generated multi-turn synthetic users
 - Studio’s evaluation-check catalog
 - Studio's general LLM trace-scoring catalog, webhooks,
   teams, or billing. Structured workflow event evaluation is supported separately.
@@ -276,6 +308,9 @@ Not included in OSS v0.1:
 ## Documentation
 
 - [Quick start](docs/quickstart.mdx)
+- [Choose your test](docs/choose-your-test.md)
+- [Scripted and synthetic-user conversations](docs/conversational-testing.md)
+- [Evidence-backed workflow evaluation](docs/workflow-evaluation.md)
 - [Self-hosting](docs/self-hosting.mdx)
 - [AgentConnector guide](docs/guides/agent-connector-setup.mdx)
 - [Standalone RAG evaluation](docs/rag-evaluation.md)
@@ -309,11 +344,13 @@ Beta:
 
 - TypeScript, Python, and CLI client surfaces
 - Operational hardening beyond a single-node deployment
+- Conversational and semantic judges: automated fixtures do not establish
+  real-model calibration or freedom from false passes/failures
 
 Planned:
 
 - More deterministic checks
-- Multi-turn OSS execution
+- Unified configuration/report interchange across runners (multi-turn execution is already available)
 - JUnit export
 - OpenAPI documentation
 - Scoped API-key management

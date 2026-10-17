@@ -5,8 +5,21 @@ description: Fail a deployment when a Humanly baseline is breached
 
 # CI/CD quality gates
 
-Humanly reports are JSON, so any CI system can poll a run and inspect
-`baselineBreach`.
+## Select the correct gate
+
+For conversational, workflow and RAG runners, use the commands documented in
+the [selection guide](../choose-your-test.md). Exit 0 means pass; both 1
+(failure) and 2 (inconclusive/error) must block release. Model-based CI needs
+provider credentials and may incur provider charges.
+
+Conversation and RAG reports expose `qualityGate`; saved workflow CLI output wraps
+the evaluator result under `report`, where `report.status` must equal `pass`.
+The workflow HTTP API additionally supplies `qualityGate.passed`.
+Use these gates rather than the legacy `baselineBreach` field.
+
+The SDK/CLI examples below apply to **legacy single-turn suites**. A
+non-empty-response baseline is a connectivity regression test, not evidence
+of conversational or RAG quality. Its JSON reports contain `baselineBreach`.
 
 ## TypeScript SDK source
 

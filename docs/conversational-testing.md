@@ -45,7 +45,7 @@ Model calls are billed by your provider, not by Studio. Scripted conversation
 grading still uses a judge; the legacy `workflow` L1–L5 runner needs no judge.
 
 ```sh
-npm run conversation -- example > conversation.json
+npx tsx src/conversation-cli.ts example > conversation.json
 # Edit the generated definition before using your own connector:
 npm run conversation -- run conversation.json https://your-agent.example/chat report.json
 npm run conversation -- replay report.json regraded-report.json
@@ -53,6 +53,16 @@ npm run conversation -- export-script report.json regression-candidate.json
 ```
 
 The example is a template, not proof that any real agent passed.
+Use `npx tsx` (or `npm run --silent`) when redirecting JSON so npm's command
+banner does not become part of the file.
+
+For the container API, environment variables must reach the `app` container.
+The checked-in Compose file forwards RAG settings but not conversation-provider
+settings. Add an operator-owned Compose override forwarding
+`CONVERSATION_MODEL_API_KEY`, `CONVERSATION_MODEL_BASE_URL`,
+`CONVERSATION_MODEL` and, only if needed, `CONVERSATION_MODEL_ALLOW_PRIVATE`.
+Setting these in the host `.env` alone does not inject them into the container.
+The standalone CLI loads the local `.env` directly.
 
 ## Definition contract
 

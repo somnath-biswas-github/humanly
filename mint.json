@@ -31,6 +31,7 @@
       "group": "Get Started",
       "pages": [
         "docs/introduction",
+        "docs/choose-your-test",
         "docs/quickstart",
         "docs/self-hosting"
       ]
@@ -42,7 +43,9 @@
         "docs/core-concepts/connectors",
         "docs/core-concepts/test-suites",
         "docs/core-concepts/evaluation-checks",
+        "docs/conversational-testing",
         "docs/workflow-evaluation",
+        "docs/rag-evaluation",
         "docs/core-concepts/baselines",
         "docs/core-concepts/llm-traces"
       ]
