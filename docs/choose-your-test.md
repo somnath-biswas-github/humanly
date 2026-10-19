@@ -4,6 +4,13 @@ Humanly OSS helps engineers evaluate agents before deployment and repeat those
 checks in CI. It works without a Studio account. Choose by the question you need
 to answer, not by the framework your agent uses.
 
+The core product journey is configured synthetic-user-driven testing followed
+by analysis of the tests performed. Configure users, goals, criteria and budgets;
+run the test; inspect transcripts, scores and evidence. Scripted checks and RAG
+evaluation support that journey rather than replace it.
+
+Before preparing input files, read the [input-format guide](input-formats.md).
+
 ## 1. Conversational behaviour
 
 Use the [conversation runner](conversational-testing.md) when you need to assess
