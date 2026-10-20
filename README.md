@@ -27,6 +27,10 @@ flowchart LR
     D --> E["Pass or block deployment"]
 ```
 
+Versioned extension schemas and compatibility boundaries are documented in the
+[contract guide](docs/evaluation-contracts.md). These schemas do not enable
+future execution features.
+
 OSS runs independently of Studio. Model-based evaluation uses your own provider;
 deterministic workflow checks need no judge. Studio adds hosted visual creation,
 managed execution and its broader evaluation catalog. Neither route guarantees

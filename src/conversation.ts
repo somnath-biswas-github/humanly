@@ -1,5 +1,6 @@
 import {evaluateWorkflow, validateWorkflowCase, workflowResponseText,
   type WorkflowCase, type WorkflowReply, type Evidence, type Status} from "./workflow.js";
+import { assertLegacyVersion } from "./evaluation-contracts.js";
 
 export type Message = {role:"user"|"assistant";content:string};
 export type ConversationDefinition = {
@@ -36,6 +37,7 @@ function keys(x:Record<string,unknown>, allowed:string[]) {
   if(Object.keys(x).some(k=>!allowed.includes(k))) throw new Error("Unknown configuration field");
 }
 export function validateConversationDefinition(value:unknown):asserts value is ConversationDefinition {
+  assertLegacyVersion(value, "Conversation definition");
   const d=value as ConversationDefinition;
   if(!object(d)||d.version!==1||d.kind!=="conversation"||!str(d.name,200)||!["synthetic","scripted"].includes(d.mode))
     throw new Error("Invalid conversation definition");

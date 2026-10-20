@@ -1,3 +1,4 @@
+import { assertLegacyVersion } from "./evaluation-contracts.js";
 export type Chunk = { id?: string; chunkId?: string; documentId?: string; content: string };
 export type Citation = { id?: string; chunkId?: string; documentId?: string };
 export type Observation = { answer: string; retrievedChunks?: Chunk[]; citations?: Citation[] };
@@ -42,6 +43,7 @@ function strings(value: unknown): boolean {
   return Array.isArray(value) && value.length <= 100 && value.every(v => string(v, 1000));
 }
 export function validateSuite(value: unknown): asserts value is RagSuite {
+  assertLegacyVersion(value, "RAG suite");
   if (!object(value) || value.version !== 1 || !string(value.name, 200) ||
       !Array.isArray(value.cases) || !value.cases.length || value.cases.length > 20) {
     throw new Error("RAG suite requires version:1, name and 1–20 cases");

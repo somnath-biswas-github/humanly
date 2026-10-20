@@ -1,3 +1,5 @@
+import { assertLegacyVersion } from "./evaluation-contracts.js";
+
 /** Framework-neutral runtime evidence. Never send WorkflowCase.checks to an agent. */
 export type Check = "L1" | "L2" | "L3" | "L4" | "L5";
 export type Status = "pass" | "fail" | "inconclusive";
@@ -45,6 +47,7 @@ function approvalInvalidated(c:WorkflowCase,events:Event[],approval:{id:string;b
     ));
 }
 export function validateWorkflowCase(value: unknown): asserts value is WorkflowCase {
+  assertLegacyVersion(value, "Workflow case");
   const c = value as WorkflowCase;
   if (!object(c) || c.version !== 1 || typeof c.name !== "string" || !Array.isArray(c.turns) || !c.turns.length || c.turns.length > 50 ||
       !c.turns.every(t => object(t) && typeof t.message === "string" && t.message.length > 0 && (!t.approval || (typeof t.approval.id === "string" && binding(t.approval.binding))) && (!t.revoke || typeof t.revoke === "string")) ||

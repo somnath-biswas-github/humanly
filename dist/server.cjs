@@ -28628,6 +28628,17 @@ function evaluateAgentResponse(responseOk, status, body) {
   };
 }
 
+// src/evaluation-contracts.ts
+var record = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+function assertLegacyVersion(value, label) {
+  if (record(value) && "contractVersion" in value) {
+    throw new Error(`${label}: extension contracts are not executable by this runner`);
+  }
+  if (record(value) && "version" in value && value.version !== 1) {
+    throw new Error(`${label}: unsupported version; expected 1`);
+  }
+}
+
 // src/workflow.ts
 var object = (x) => !!x && typeof x === "object" && !Array.isArray(x);
 function canonical(x) {
@@ -28642,6 +28653,7 @@ function approvalInvalidated(c, events, approval, userTurn, originSeq, before) {
   return c.turns.slice(userTurn - 1, before.turn).some((t) => t.revoke === approval.id) || events.some((e) => e.seq > originSeq && e.seq < before.seq && (e.type === "revoke" && e.approvalId === approval.id || e.type === "state" && (e.values?.target !== void 0 && e.values.target !== approval.binding.target || e.values?.action !== void 0 && e.values.action !== approval.binding.action || e.values?.params !== void 0 && !same(e.values.params, approval.binding.params))));
 }
 function validateWorkflowCase(value) {
+  assertLegacyVersion(value, "Workflow case");
   const c = value;
   if (!object(c) || c.version !== 1 || typeof c.name !== "string" || !Array.isArray(c.turns) || !c.turns.length || c.turns.length > 50 || !c.turns.every((t) => object(t) && typeof t.message === "string" && t.message.length > 0 && (!t.approval || typeof t.approval.id === "string" && binding(t.approval.binding)) && (!t.revoke || typeof t.revoke === "string")) || !object(c.checks) || !Object.keys(c.checks).length || Object.keys(c.checks).some((k) => !["L1", "L2", "L3", "L4", "L5"].includes(k) || !object(c.checks[k]))) throw new Error("Invalid workflow v1 case or scripted turns");
   const { L1, L2, L3, L4, L5 } = c.checks;
@@ -28906,6 +28918,7 @@ function strings(value) {
   return Array.isArray(value) && value.length <= 100 && value.every((v) => string(v, 1e3));
 }
 function validateSuite(value) {
+  assertLegacyVersion(value, "RAG suite");
   if (!object2(value) || value.version !== 1 || !string(value.name, 200) || !Array.isArray(value.cases) || !value.cases.length || value.cases.length > 20) {
     throw new Error("RAG suite requires version:1, name and 1\u201320 cases");
   }
@@ -29306,6 +29319,7 @@ function keys(x, allowed) {
   if (Object.keys(x).some((k) => !allowed.includes(k))) throw new Error("Unknown configuration field");
 }
 function validateConversationDefinition(value) {
+  assertLegacyVersion(value, "Conversation definition");
   const d = value;
   if (!object3(d) || d.version !== 1 || d.kind !== "conversation" || !str(d.name, 200) || !["synthetic", "scripted"].includes(d.mode))
     throw new Error("Invalid conversation definition");
@@ -29390,7 +29404,7 @@ async function runConversation(options) {
     return result.output;
   };
   for (let i = 0; i < d.config.conversationCount; i++) {
-    const record = {
+    const record2 = {
       id: `${options.runId}_${i + 1}`,
       messages: [],
       evidence: { version: 1, source: "runtime", complete: true, events: [] },
@@ -29399,69 +29413,69 @@ async function runConversation(options) {
       score: null,
       assessments: []
     };
-    conversations.push(record);
+    conversations.push(record2);
     try {
       if (modelCalls >= d.config.maxModelCalls || tokenCount >= d.config.maxTokens) throw new Error("Model budget exhausted");
       if (options.replay) {
         const source = options.replay.conversations[i];
-        record.messages = structuredClone(source.messages);
-        record.evidence = structuredClone(source.evidence);
-        record.termination = source.termination;
+        record2.messages = structuredClone(source.messages);
+        record2.evidence = structuredClone(source.evidence);
+        record2.termination = source.termination;
       } else {
         for (let turn = 1; turn <= d.config.maxTurns + 1; turn++) {
           let message;
           if (d.mode === "scripted") {
             if (turn > d.turns.length) {
-              record.termination = "completed";
+              record2.termination = "completed";
               break;
             }
             message = d.turns[turn - 1].message;
           } else {
-            const output = await call({ purpose: "simulate", persona: d.persona, scenario: d.scenario, messages: record.messages, turn });
+            const output = await call({ purpose: "simulate", persona: d.persona, scenario: d.scenario, messages: record2.messages, turn });
             if (!object3(output) || typeof output.done !== "boolean" || typeof output.message !== "string") throw new Error("Invalid synthetic-user output");
             keys(output, ["done", "message"]);
             if (output.done) {
-              if (!record.messages.length || output.message !== "") throw new Error("Synthetic user cannot end before an interaction or send a message while done");
-              record.termination = "completed";
+              if (!record2.messages.length || output.message !== "") throw new Error("Synthetic user cannot end before an interaction or send a message while done");
+              record2.termination = "completed";
               break;
             }
             if (!str(output.message, 12e3)) throw new Error("Synthetic message is empty or too long");
             message = output.message;
           }
           if (turn > d.config.maxTurns) {
-            record.termination = "turn_limit";
+            record2.termination = "turn_limit";
             break;
           }
-          const history = structuredClone(record.messages);
-          record.messages.push({ role: "user", content: message });
+          const history = structuredClone(record2.messages);
+          record2.messages.push({ role: "user", content: message });
           const reply = await deadline(() => options.invoke({
             message,
             history,
-            messages: structuredClone(record.messages),
-            conversationId: record.id,
-            sessionId: record.id,
+            messages: structuredClone(record2.messages),
+            conversationId: record2.id,
+            sessionId: record2.id,
             turn
           }), d.config.timeoutMs);
           const answer = workflowResponseText(reply);
           if (!str(answer, 64e3)) throw new Error("Agent response must contain nonempty text");
-          record.messages.push({ role: "assistant", content: answer });
+          record2.messages.push({ role: "assistant", content: answer });
           const e = reply.workflow;
           if (!e || e.version !== 1 || e.source !== "runtime" || e.complete !== true || !Array.isArray(e.events) || e.events.some((v) => v.turn !== turn))
-            record.evidence.complete = false;
-          else record.evidence.events.push(...structuredClone(e.events));
+            record2.evidence.complete = false;
+          else record2.evidence.events.push(...structuredClone(e.events));
         }
       }
-      record.assessments = validateAssessments(await call({ purpose: "judge", scenario: d.scenario, criteria: d.criteria, messages: record.messages }), d.criteria, record.messages);
-      record.score = record.assessments.reduce((sum, r) => sum + r.score * d.criteria.find((c) => c.id === r.id).weight / 100, 0);
-      const failed = record.score < d.config.minimumScore || record.assessments.some((r) => {
+      record2.assessments = validateAssessments(await call({ purpose: "judge", scenario: d.scenario, criteria: d.criteria, messages: record2.messages }), d.criteria, record2.messages);
+      record2.score = record2.assessments.reduce((sum, r) => sum + r.score * d.criteria.find((c) => c.id === r.id).weight / 100, 0);
+      const failed = record2.score < d.config.minimumScore || record2.assessments.some((r) => {
         const c = d.criteria.find((c2) => c2.id === r.id);
         return c.required && r.score < c.minimumScore;
       });
       if (d.workflowChecks) {
-        const turns = d.mode === "scripted" ? d.turns : record.messages.filter((m) => m.role === "user").map((m) => ({ message: m.content }));
-        record.workflow = evaluateWorkflow({ version: 1, name: d.name, turns, checks: d.workflowChecks }, record.evidence);
+        const turns = d.mode === "scripted" ? d.turns : record2.messages.filter((m) => m.role === "user").map((m) => ({ message: m.content }));
+        record2.workflow = evaluateWorkflow({ version: 1, name: d.name, turns, checks: d.workflowChecks }, record2.evidence);
       }
-      record.status = record.termination !== "completed" || record.workflow?.status === "inconclusive" ? "inconclusive" : failed || record.workflow?.status === "fail" ? "fail" : "pass";
+      record2.status = record2.termination !== "completed" || record2.workflow?.status === "inconclusive" ? "inconclusive" : failed || record2.workflow?.status === "fail" ? "fail" : "pass";
     } catch (error2) {
       const safeMessages = /* @__PURE__ */ new Set([
         "Model budget exhausted",
@@ -29475,8 +29489,8 @@ async function runConversation(options) {
         "Incomplete or duplicate criterion verdicts",
         "Invalid criterion assessment or unsupported quote"
       ]);
-      record.error = error2 instanceof Error && safeMessages.has(error2.message) ? error2.message : "Conversation incomplete: invalid output or execution error. Check local provider/connector configuration.";
-      record.status = "inconclusive";
+      record2.error = error2 instanceof Error && safeMessages.has(error2.message) ? error2.message : "Conversation incomplete: invalid output or execution error. Check local provider/connector configuration.";
+      record2.status = "inconclusive";
     }
   }
   const status = conversations.some((c) => c.status === "inconclusive") ? "inconclusive" : conversations.some((c) => c.status === "fail") ? "fail" : "pass";
