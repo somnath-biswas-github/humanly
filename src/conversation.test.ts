@@ -12,7 +12,7 @@ test("judge separates behaviour, test exposure and configured policy",()=>{
 const usage={model:"fixture",promptTokens:1,completionTokens:1,totalTokens:2};
 const model:Model=async input=>({usage,output:input.purpose==="simulate"?
   {done:input.messages.length>0,message:input.messages.length?"":"Can I return these headphones?"}:
-  {assessments:input.criteria.map(c=>({id:c.id,score:100,explanation:"Fixture meets the requested criterion.",quote:"Contact support."}))}});
+  {assessments:input.purpose==="judge"?input.criteria.map(c=>({id:c.id,score:100,explanation:"Fixture meets the requested criterion.",quote:"Contact support."})):[]}});
 const invoke=async()=>({reply:"Contact support."});
 
 test("synthetic persona/scenario drive messages; criteria never reach simulator or agent; each session is isolated",async()=>{

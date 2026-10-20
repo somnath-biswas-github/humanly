@@ -89,7 +89,7 @@ test("extension contracts never execute on either surface or legacy validators",
     assert.throws(() => validator(scenario), /not executable/);
     assert.throws(() => validator({ version: 2 }), /unsupported version/);
   }
-  assert.equal(EVALUATION_CAPABILITIES.find(c => c.id === "branching-scenario")?.studio, "contract-only");
+  assert.equal(EVALUATION_CAPABILITIES.find(c => c.id === "branching-scenario")?.studio, "available");
 });
 test("legacy inputs retain weights, thresholds and contents", () => {
   const conversation = conversationExample();

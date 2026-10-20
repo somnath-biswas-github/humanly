@@ -175,8 +175,9 @@ export const EVALUATION_CAPABILITIES = [
   { id: "synthetic-conversation", oss: "available", studio: "available", interchange: "manual; no score parity" },
   { id: "workflow-evidence", oss: "available", studio: "available", interchange: "version-1 case/evidence; connector credentials excluded" },
   { id: "independent-rag", oss: "available", studio: "available", interchange: "Studio export with conversion warnings; not reverse import" },
-  { id: "branching-scenario", oss: "contract-only", studio: "contract-only", interchange: "not executable" },
+  { id: "branching-scenario", oss: "available", studio: "available", interchange: "opt-in executionPlan; captured script is one path, not branch parity" },
+  { id: "reusable-metrics", oss: "available", studio: "available", interchange: "versioned metrics in executionPlan; separate evidence/exposure gate" },
   { id: "metric-provider-report-extensions", oss: "contract-only", studio: "contract-only", interchange: "validation only; existing reports unchanged" },
-  { id: "conversational-rag", oss: "planned", studio: "planned", interchange: "unsupported" },
+  { id: "conversational-rag", oss: "available", studio: "available", interchange: "per-turn reference cases and actual evidence in executionPlan" },
   { id: "framework-evidence-adapters", oss: "planned", studio: "planned", interchange: "existing starter is not adapter parity" },
 ] as const;

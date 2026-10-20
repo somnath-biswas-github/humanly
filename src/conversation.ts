@@ -1,6 +1,12 @@
 import {evaluateWorkflow, validateWorkflowCase, workflowResponseText,
   type WorkflowCase, type WorkflowReply, type Evidence, type Status} from "./workflow.js";
 import { assertLegacyVersion } from "./evaluation-contracts.js";
+import { validateExecutionPlan, type ExecutionPlan } from "./execution-plan.js";
+import type { MetricContract, MetricResultContract } from "./evaluation-contracts.js";
+import type { JudgeInput, Observation } from "./rag-contract.js";
+import type { CaseReport as RagCaseReport } from "./rag.js";
+import { runAdvancedConversation } from "./advanced-conversation.js";
+import type { BranchDecision } from "./scenario-graph.js";
 
 export type Message = {role:"user"|"assistant";content:string};
 export type ConversationDefinition = {
@@ -10,12 +16,16 @@ export type ConversationDefinition = {
   criteria:Array<{id:string;description:string;weight:number;minimumScore:number;required:boolean}>;
   config:{conversationCount:number;maxTurns:number;minimumScore:number;maxModelCalls:number;maxTokens:number;timeoutMs:number};
   turns?:WorkflowCase["turns"]; workflowChecks?:WorkflowCase["checks"];
+  executionPlan?: ExecutionPlan;
 };
 export type Usage = {model:string;promptTokens:number;completionTokens:number;totalTokens:number};
 export type ModelResult = {output:unknown;usage:Usage};
 export type ModelInput =
   | {purpose:"simulate";persona:NonNullable<ConversationDefinition["persona"]>;scenario:ConversationDefinition["scenario"];messages:Message[];turn:number}
-  | {purpose:"judge";scenario:ConversationDefinition["scenario"];criteria:ConversationDefinition["criteria"];messages:Message[]};
+  | {purpose:"judge";scenario:ConversationDefinition["scenario"];criteria:ConversationDefinition["criteria"];messages:Message[]}
+  | {purpose:"route";conditions:string[];messages:Message[]}
+  | {purpose:"metric";metric:MetricContract;scenario:ConversationDefinition["scenario"];messages:Message[];evidence:Evidence;observations?:Array<{turn:number;observation:Observation}>}
+  | {purpose:"rag";input:JudgeInput;messages:Message[]};
 export type Model = (input:ModelInput, limits:{timeoutMs:number;maxOutputTokens:number})=>Promise<ModelResult>;
 export type AgentRequest = {message:string;history:Message[];messages:Message[];conversationId:string;sessionId:string;turn:number};
 export type Assessment = {id:string;score:number;explanation:string;quote:string};
@@ -23,6 +33,10 @@ export type ConversationRecord = {
   id:string;messages:Message[];evidence:Evidence;termination:"completed"|"turn_limit"|"error";
   status:Status;score:number|null;assessments:Assessment[];error?:string;
   workflow?:ReturnType<typeof evaluateWorkflow>;
+  branchHistory?: BranchDecision[];
+  metricResults?: MetricResultContract[];
+  ragResults?: Array<{turn:number;report:RagCaseReport}>;
+  observations?: Array<{turn:number;observation:Observation}>;
 };
 export type ConversationReport = {
   version:1;kind:"conversation-report";runId:string;definition:ConversationDefinition;
@@ -41,7 +55,12 @@ export function validateConversationDefinition(value:unknown):asserts value is C
   const d=value as ConversationDefinition;
   if(!object(d)||d.version!==1||d.kind!=="conversation"||!str(d.name,200)||!["synthetic","scripted"].includes(d.mode))
     throw new Error("Invalid conversation definition");
-  keys(d,["version","kind","name","mode","persona","scenario","criteria","config","turns","workflowChecks"]);
+  keys(d,["version","kind","name","mode","persona","scenario","criteria","config","turns","workflowChecks","executionPlan"]);
+  if (d.executionPlan) {
+    validateExecutionPlan(d.executionPlan);
+    if(d.executionPlan.graph && d.mode!=="synthetic") throw new Error("Branch graphs require synthetic mode");
+    if(d.executionPlan.graph && d.workflowChecks?.L2) throw new Error("Branch graphs cannot supply trusted scripted approvals");
+  }
   if(d.persona!==undefined){
     if(!object(d.persona)||!str(d.persona.name,200)||!str(d.persona.description)) throw new Error("Invalid persona");
     keys(d.persona,["name","description"]);
@@ -97,6 +116,7 @@ export async function runConversation(options:{
   replay?:ConversationReport;
 }):Promise<ConversationReport> {
   validateConversationDefinition(options.definition);
+  if(options.definition.executionPlan) return runAdvancedConversation({...options,definition:options.definition});
   // Copies prevent dependency callbacks and caller edits from changing expected criteria mid-run.
   const d=structuredClone(options.definition), createdAt=new Date().toISOString();
   if(options.replay){
@@ -208,6 +228,11 @@ export function exportConversationScript(report:ConversationReport,index=0):Conv
     config:{...report.definition.config,conversationCount:1}};
   // Preserve authored approval annotations only for already-scripted runs.
   if(report.definition.mode==="scripted") definition.turns=structuredClone(report.definition.turns);
+  // A captured branch becomes one linear candidate, not the original graph.
+  if (definition.executionPlan?.graph) delete definition.executionPlan.graph;
+  if (definition.executionPlan && !definition.executionPlan.metrics.length && !definition.executionPlan.ragCases.length)
+    delete definition.executionPlan;
+  definition.config.maxTurns = Math.max(definition.config.maxTurns, definition.turns!.length);
   validateConversationDefinition(definition);
   return definition;
 }

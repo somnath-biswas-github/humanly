@@ -1,5 +1,11 @@
 # Evaluation extension contracts (Phase 1)
 
+**Execution update:** Phases 2–3 now accept an opt-in `executionPlan` inside an
+existing conversation definition. See [advanced evaluation](advanced-evaluation.md).
+Standalone contract envelopes still cannot be sent directly to legacy endpoints.
+The contract-only matrix below records the original Phase 1 boundary; the advanced
+guide is the current execution reference.
+
 Humanly remains configured synthetic-user testing followed by analysis. Phase 1
 adds **validation contracts, not new execution modes**. Existing version-1
 conversation, workflow and RAG definitions remain the executable formats.
