@@ -7,7 +7,7 @@ function assertPublic(input) {
   const host = typeof input === "string" || input instanceof URL
     ? new URL(input).hostname
     : String(input.hostname || input.host || "").split(":")[0];
-  if (host.endsWith(".replit.internal")) {
+  if (host.endsWith(".replit.internal") || host.endsWith(".replit.local")) {
     throw new Error(`External-consumer install attempted private host: ${host}`);
   }
 }

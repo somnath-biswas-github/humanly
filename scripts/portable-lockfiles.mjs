@@ -11,7 +11,7 @@ for (const name of ["package-lock.json", "packages/sdk/package-lock.json", "pack
   let count = 0;
   for (const dependency of Object.values(lock.packages)) {
     if (!dependency.resolved) continue;
-    const match = /^https?:\/\/package-firewall\.replit\.internal\/npm\/(.+)$/.exec(dependency.resolved);
+    const match = /^https?:\/\/package-firewall\.replit\.(?:internal|local)\/npm\/(.+)$/.exec(dependency.resolved);
     if (!match) continue;
     if (!dependency.integrity) throw new Error(`Missing integrity hash in ${name}`);
     dependency.resolved = `https://registry.npmjs.org/${match[1]}`;
