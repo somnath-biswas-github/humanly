@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build, test, and check documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install server dependencies
+        run: |
+          npm run check:lockfiles
+          npm ci
+
+      - name: Verify server and documentation
+        run: npm run verify
+
+      - name: Build TypeScript SDK
+        working-directory: packages/sdk
+        run: |
+          npm ci
+          npm run build
+          npm run lint
+          npm pack --dry-run
+
+      - name: Build CLI
+        working-directory: packages/cli
+        run: |
+          npm ci
+          npm run build
+          npm pack --dry-run
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Python SDK wheel
+        working-directory: packages/python-sdk
+        run: python -m pip wheel --no-cache-dir --wheel-dir dist .

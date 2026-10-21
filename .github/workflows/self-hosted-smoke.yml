@@ -1,0 +1,59 @@
+name: Self-hosted smoke test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docker-smoke:
+    name: Docker, health, migrations, API, SDKs, and CLI
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.10", "3.12"]
+    env:
+      HUMANLY_API_KEY: humanly-ci-smoke-key-not-for-production
+      HUMANLY_ALLOW_PRIVATE_CONNECTORS: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build release bundle and packages
+        run: |
+          npm ci
+          npm run verify
+          npm --prefix packages/sdk ci
+          npm --prefix packages/sdk run build
+          npm --prefix packages/cli ci
+          npm --prefix packages/cli run build
+
+      - name: Start a fresh cacheless stack
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.smoke.yml down -v --remove-orphans || true
+          docker compose -f docker-compose.yml -f docker-compose.smoke.yml build --no-cache --pull
+          docker compose -f docker-compose.yml -f docker-compose.smoke.yml up -d
+
+      - name: Exercise health, migrations, API, SDKs, and CLI
+        run: node scripts/self-hosted-smoke.mjs
+
+      - name: Show stack logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml -f docker-compose.smoke.yml logs --no-color
+
+      - name: Remove disposable stack
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.smoke.yml down -v --remove-orphans
