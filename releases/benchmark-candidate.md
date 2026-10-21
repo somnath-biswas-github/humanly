@@ -1,22 +1,50 @@
-# Independent benchmark handoff — candidate, not qualified release
+# Independent benchmark handoff — pinned OSS baseline, benchmark pending
 
 ## Version freeze
 
-- Humanly: use the immutable public commit and artifact SHA recorded by the
-  release qualifier **after** the changes in this candidate are published.
-  No current public revision is asserted to contain these additions.
+- Humanly OSS: **be05a8bd6364a67d635341fa845632368ee69fe1**.
+  [Immutable public revision](https://github.com/somnath-biswas-github/humanly/tree/be05a8bd6364a67d635341fa845632368ee69fe1).
+- Shipped `dist/server.cjs` SHA-256:
+  `57135064b3f4799964add67647fd0cee3b24d7b703fc5d1dd7a95b42efd67552`.
+  Git blob SHA-1: `248016ae1bee93ea1111a7044999ddb7428b335f`.
 - DeepEval comparison target: **4.3.1**, selected from its published package
   metadata on 2026-10-20; not installed or execution-verified here.
 - Framework fixture versions: langchain-core **1.6.12**, langgraph **1.2.16**,
   openai-agents **0.24.0**. Broader version ranges are not certified.
 
-Do not start the independent comparison until Humanly's public revision is
-pinned and the tester confirms DeepEval installation and supported interfaces.
+Humanly's OSS baseline is pinned. The tester must still confirm DeepEval
+installation/interfaces, approve held-out expected outcomes and obtain a live
+budget before starting the independent comparison.
+
+## Recorded OSS qualification evidence
+
+Both workflows completed successfully for the exact pinned revision on
+2026-10-21:
+
+- [CI: tests, bundle consistency, builds, documentation and SDK packaging](https://github.com/somnath-biswas-github/humanly/actions/runs/39651949785).
+- [Self-hosted smoke test: Python 3.10 and 3.12](https://github.com/somnath-biswas-github/humanly/actions/runs/39651949820).
+  Both matrix jobs passed cacheless Docker startup, health/readiness, migrations,
+  HTTP API, installed TypeScript/Python SDK and CLI checks, and resource cleanup.
+
+This is deterministic/local-integration qualification, not held-out semantic
+calibration, Studio production/billing certification or independent signoff.
 
 ## Installation and local controls
 
 Follow the repository README for clean Humanly installation, then run
 `npm run verify` and the documented conversation/workflow/RAG CLI examples.
+Use the pinned revision, not a moving `main` branch:
+
+```sh
+git clone https://github.com/somnath-biswas-github/humanly.git
+cd humanly
+git checkout --detach be05a8bd6364a67d635341fa845632368ee69fe1
+npm ci
+npm run verify
+sha256sum dist/server.cjs
+```
+
+The hash must equal the shipped-bundle SHA-256 above.
 Run `python scripts/test-framework-adapters.py` with the pinned local framework
 packages. Those tests use a deterministic model and actual local tools.
 The public controlled workflow examples are development controls, **not**
@@ -50,7 +78,7 @@ For each run record:
 
 | Field | Value |
 |---|---|
-| Immutable product revisions / artifact hashes | pending freeze |
+| Immutable product revisions / artifact hashes | Humanly revision and bundle pinned above; DeepEval execution validation pending |
 | Code/configuration version and run time | |
 | Fixture / local integration / held-out live | |
 | Human reviewer and expected-outcome approval | |
@@ -65,9 +93,16 @@ For each run record:
 
 ## Release gates still requiring independent evidence
 
-Clean installation from the final public revision; container startup/readiness;
-published authenticated Studio journeys; complete conversational billing
-isolation/failure-path verification; human-reviewed held-out expected outcomes;
-independent comparative execution and signed-off findings.
+DeepEval installation/interface verification; equivalent benchmark adapters and
+configuration freeze; human-reviewed held-out expected outcomes; explicit live
+budget; independent comparative execution and signed-off findings.
 
-This package prepares the handoff. It does not claim those gates have passed.
+If Studio is included in the comparison, qualify its published authenticated
+journeys and complete conversational billing isolation/failure paths separately.
+The OSS workflow results do not establish those Studio properties.
+
+Next prepare the executable comparison setup and case manifest. Record expected
+behaviour, evidence availability and required exposure before running either
+evaluator. Reviewers must approve expected outcomes independently of generated
+drafts or development fixtures. Do not report the benchmark as complete until
+the independent reviewer has executed and signed off the held-out results.
