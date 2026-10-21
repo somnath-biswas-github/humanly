@@ -40,7 +40,23 @@ Both scripted and synthetic conversational grading need a model provider.
 Synthetic mode also uses it for user simulation. Calls are billed by your provider.
 CLI runs do not require PostgreSQL or the hosted Studio product.
 
-## 2. Workflow correctness
+## 2. Conversational RAG
+
+Use [Conversational RAG](advanced-evaluation.md) to evaluate knowledge-grounded
+answers across a multi-turn conversation. This uses the advanced conversation
+runner, not the independent-question RAG runner.
+
+Configure a persona or scripted turns, scenario, criteria and budgets, then
+attach independent references to the relevant conversation turns. The connector
+must supply retrieval/citation evidence. References remain evaluator-side:
+writing a reference question does not force the simulated user to ask it.
+Align scenario or stage instructions with the intended reference turns.
+
+Conversation and RAG judging use model providers; synthetic user simulation also
+uses a provider. Missing evidence or an unexercised target is not proof of a pass.
+See the advanced guide for configuration and execution commands.
+
+## 3. Workflow correctness
 
 Use [workflow L1–L5](workflow-evaluation.md) to check permitted actions,
 approval authorisation, state/target consistency, tool-outcome claims and
@@ -67,7 +83,7 @@ guide also covers live-agent execution and HTTP fixtures.
 You can add `workflowChecks` to a conversation definition. Trusted L2 approvals
 require authored scripted annotations; a synthetic user cannot manufacture consent.
 
-## 3. RAG answer quality
+## 4. Standalone RAG answer quality
 
 Use [RAG evaluation](rag-evaluation.md) for independent questions with golden
 references and retrieval evidence. It assesses supported claims, expected facts,
@@ -81,7 +97,7 @@ advanced conversation runner with turn-linked retrieval references and metrics.
 For persona-informed independent questions, follow [persona to report](persona-to-report.md).
 L1–L5 supplement this configured journey; they do not replace synthetic users.
 
-## 4. Connector smoke testing
+## 5. Connector smoke testing
 
 Legacy `POST /v1/runs` suites check HTTP success and non-empty text. They support
 stored score baselines but do **not** grade configurable conversational rubrics.
