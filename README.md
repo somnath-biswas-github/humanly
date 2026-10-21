@@ -38,6 +38,18 @@ production safety or identical scores.
 
 ## Choose what to test
 
+Start with **representative users → criteria and configuration → execution →
+evaluation → evidence-backed reports**. L1–L5 are optional workflow evidence
+checks, not a replacement for that journey.
+
+- For adaptive conversations and conversational RAG, start with the
+  [conversation runner](docs/conversational-testing.md); use an advanced plan
+  for branching, exposure requirements and turn-linked retrieval evaluation.
+- For independent RAG questions, start with the
+  [persona-to-report guide](docs/persona-to-report.md). Draft persona-informed
+  questions, independently review expectations, and explicitly run the approved
+  suite. Existing authored golden sets remain supported.
+
 | Your question | OSS runner | What you configure | Model provider? |
 | --- | --- | --- | --- |
 | Does the agent handle a realistic conversation well? | [Conversation](docs/conversational-testing.md), scripted or synthetic | User turns or persona; scenario; weighted criteria; thresholds and budgets | Yes: judge in both modes, simulator in synthetic mode |
@@ -46,7 +58,8 @@ production safety or identical scores.
 | Is the connector reachable and returning text? | Legacy single-turn suites | Endpoint, goal, count and optional baseline | No judge; this is only a smoke test |
 
 Conversational and workflow checks can be combined with `workflowChecks`.
-RAG currently evaluates independent questions, not multi-turn conversational RAG.
+The dedicated RAG runner evaluates independent questions. Multi-turn
+conversational RAG is supported through the advanced conversation runner.
 See [the selection guide](docs/choose-your-test.md) for commands, setup and CI rules.
 
 ## Two ways to use Humanly

@@ -14819,8 +14819,8 @@ var require_text = __commonJS({
     var debug = require_src()("body-parser:text");
     var read = require_read();
     var typeis = require_type_is();
-    module2.exports = text3;
-    function text3(options) {
+    module2.exports = text4;
+    function text4(options) {
       var opts = options || {};
       var defaultCharset = opts.defaultCharset || "utf-8";
       var inflate = opts.inflate !== false;
@@ -20896,9 +20896,6 @@ var require_proxy_addr = __commonJS({
       return function trust(addr) {
         if (!isip(addr)) return false;
         var ip = parseip(addr);
-        if (ip.kind() === "ipv6" && ip.isIPv4MappedAddress()) {
-          ip = ip.toIPv4Address();
-        }
         var ipconv;
         var kind = ip.kind();
         for (var i = 0; i < subnets.length; i++) {
@@ -20911,15 +20908,10 @@ var require_proxy_addr = __commonJS({
             if (subnetkind === "ipv4" && !ip.isIPv4MappedAddress()) {
               continue;
             }
-            if (subnetkind !== "ipv4" && !(subnetrange >= 96 && subnetip.isIPv4MappedAddress())) {
-              continue;
-            }
             if (!ipconv) {
               ipconv = subnetkind === "ipv4" ? ip.toIPv4Address() : ip.toIPv4MappedAddress();
             }
             trusted = ipconv;
-          } else if (kind === "ipv6" && subnetip.isIPv4MappedAddress()) {
-            continue;
           }
           if (trusted.match(subnetip, subnetrange)) {
             return true;
@@ -20936,20 +20928,12 @@ var require_proxy_addr = __commonJS({
       return function trust(addr) {
         if (!isip(addr)) return false;
         var ip = parseip(addr);
-        if (ip.kind() === "ipv6" && ip.isIPv4MappedAddress()) {
-          ip = ip.toIPv4Address();
-        }
         var kind = ip.kind();
         if (kind !== subnetkind) {
           if (subnetisipv4 && !ip.isIPv4MappedAddress()) {
             return false;
           }
-          if (!subnetisipv4 && !(subnetrange >= 96 && subnetip.isIPv4MappedAddress())) {
-            return false;
-          }
           ip = subnetisipv4 ? ip.toIPv4Address() : ip.toIPv4MappedAddress();
-        } else if (kind === "ipv6" && subnetip.isIPv4MappedAddress()) {
-          return false;
         }
         return ip.match(subnetip, subnetrange);
       };
@@ -22087,7 +22071,7 @@ var require_request = __commonJS({
       var method = this.method;
       var res = this.res;
       var status = res.statusCode;
-      if ("GET" !== method && "HEAD" !== method && "QUERY" !== method) return false;
+      if ("GET" !== method && "HEAD" !== method) return false;
       if (status >= 200 && status < 300 || 304 === status) {
         return fresh(this.headers, {
           "etag": res.get("ETag"),
@@ -24103,14 +24087,7 @@ var require_utils3 = __commonJS({
   "node_modules/pg/lib/utils.js"(exports2, module2) {
     "use strict";
     var defaults2 = require_defaults();
-    var nodeUtils = require("util");
     var { isDate } = require("util/types");
-    var invalidDateDeprecationNotice = nodeUtils.deprecate(
-      () => {
-      },
-      "Sending an invalid date to Postgres is deprecated and will throw an error in the next major version of pg. Ensure any Date object passed as a query parameter is valid.",
-      "PG_INVALID_DATE"
-    );
     function escapeElement(elementRepresentation) {
       const escaped = elementRepresentation.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
       return '"' + escaped + '"';
@@ -24150,9 +24127,6 @@ var require_utils3 = __commonJS({
           return Buffer.from(val.buffer, val.byteOffset, val.byteLength);
         }
         if (isDate(val)) {
-          if (isNaN(val.getTime())) {
-            invalidDateDeprecationNotice();
-          }
           if (defaults2.parseInputDatesAsUTC) {
             return dateToStringUTC(val);
           } else {
@@ -24203,7 +24177,7 @@ var require_utils3 = __commonJS({
       return ret;
     }
     function normalizeQueryConfig(config, values, callback) {
-      config = typeof config === "string" ? { text: config } : cloneQueryConfig(config);
+      config = typeof config === "string" ? { text: config } : config;
       if (values) {
         if (typeof values === "function") {
           config.callback = values;
@@ -24215,12 +24189,6 @@ var require_utils3 = __commonJS({
         config.callback = callback;
       }
       return config;
-    }
-    function cloneQueryConfig(config) {
-      if (config == null) {
-        return config;
-      }
-      return Object.defineProperties(Object.create(Object.getPrototypeOf(config)), Object.getOwnPropertyDescriptors(config));
     }
     var escapeIdentifier2 = function(str2) {
       return '"' + str2.replace(/"/g, '""') + '"';
@@ -24295,11 +24263,11 @@ var require_utils4 = __commonJS({
       const outer = await md5(Buffer.concat([Buffer.from(inner), salt]));
       return "md5" + outer;
     }
-    async function sha256(text3) {
-      return await subtleCrypto.digest("SHA-256", text3);
+    async function sha256(text4) {
+      return await subtleCrypto.digest("SHA-256", text4);
     }
-    async function hashByName(hashName, text3) {
-      return await subtleCrypto.digest(hashName, text3);
+    async function hashByName(hashName, text4) {
+      return await subtleCrypto.digest(hashName, text4);
     }
     async function hmacSha256(keyBuffer, msg) {
       const key = await subtleCrypto.importKey("raw", keyBuffer, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -24411,7 +24379,7 @@ var require_cert_signatures = __commonJS({
           }
           throw x509Error("unknown hash OID " + hashOID, data);
         }
-        // Ed25519 -- see https://github.com/openssl/openssl/issues/15477
+        // Ed25519 -- see https: return//github.com/openssl/openssl/issues/15477
         case "1.3.101.110":
         case "1.3.101.112":
           return "SHA-512";
@@ -24520,21 +24488,21 @@ var require_sasl = __commonJS({
         throw new Error("SASL: SCRAM-SERVER-FINAL-MESSAGE: server signature does not match");
       }
     }
-    function isPrintableChars(text3) {
-      if (typeof text3 !== "string") {
+    function isPrintableChars(text4) {
+      if (typeof text4 !== "string") {
         throw new TypeError("SASL: text must be a string");
       }
-      return text3.split("").map((_, i) => text3.charCodeAt(i)).every((c) => c >= 33 && c <= 43 || c >= 45 && c <= 126);
+      return text4.split("").map((_, i) => text4.charCodeAt(i)).every((c) => c >= 33 && c <= 43 || c >= 45 && c <= 126);
     }
-    function isBase64(text3) {
-      return /^(?:[a-zA-Z0-9+/]{4})*(?:[a-zA-Z0-9+/]{2}==|[a-zA-Z0-9+/]{3}=)?$/.test(text3);
+    function isBase64(text4) {
+      return /^(?:[a-zA-Z0-9+/]{4})*(?:[a-zA-Z0-9+/]{2}==|[a-zA-Z0-9+/]{3}=)?$/.test(text4);
     }
-    function parseAttributePairs(text3) {
-      if (typeof text3 !== "string") {
+    function parseAttributePairs(text4) {
+      if (typeof text4 !== "string") {
         throw new TypeError("SASL: attribute pairs text must be a string");
       }
       return new Map(
-        text3.split(",").map((attrValue) => {
+        text4.split(",").map((attrValue) => {
           if (!/^.=/.test(attrValue)) {
             throw new Error("SASL: Invalid attribute pair entry");
           }
@@ -24683,7 +24651,7 @@ var require_pg_connection_string = __commonJS({
         config.client_encoding = result.searchParams.get("encoding");
         return config;
       }
-      const hostname = (dummyHost ? "" : result.hostname).replace(/^\[(.+)\]$/, "$1");
+      const hostname = dummyHost ? "" : result.hostname;
       if (!config.host) {
         config.host = decodeURIComponent(hostname);
       } else if (hostname && /^%2f/i.test(hostname)) {
@@ -25220,7 +25188,7 @@ var require_query2 = __commonJS({
         return null;
       }
       hasBeenParsed(connection) {
-        return this.name && (connection.parsedStatements[this.name] !== void 0 || connection.submittedNamedStatements[this.name] !== void 0);
+        return this.name && (connection.parsedStatements[this.name] || connection.submittedNamedStatements[this.name]);
       }
       handlePortalSuspended(connection) {
         this._getRows(connection, this.rows);
@@ -25416,9 +25384,9 @@ var require_messages = __commonJS({
     };
     exports2.ReadyForQueryMessage = ReadyForQueryMessage;
     var CommandCompleteMessage = class {
-      constructor(length, text3) {
+      constructor(length, text4) {
         this.length = length;
-        this.text = text3;
+        this.text = text4;
         this.name = "commandComplete";
       }
     };
@@ -25462,7 +25430,7 @@ var require_buffer_writer = __commonJS({
           const oldBuffer = this.buffer;
           const newSize = oldBuffer.length + (oldBuffer.length >> 1) + size;
           this.buffer = Buffer.allocUnsafe(newSize);
-          oldBuffer.copy(this.buffer, 0, 0, this.offset);
+          oldBuffer.copy(this.buffer);
         }
       }
       addInt32(num) {
@@ -25522,15 +25490,6 @@ var require_buffer_writer = __commonJS({
         otherBuffer.copy(this.buffer, this.offset);
         this.offset += otherBuffer.length;
         return this;
-      }
-      /**
-       * Appends an uninitialized block of {@link size} bytes to the buffer and returns its offset.
-       */
-      reserveUnsafe(size) {
-        const offset = this.offset;
-        this.ensure(size);
-        this.offset += size;
-        return offset;
       }
       join(code) {
         if (code) {
@@ -25599,8 +25558,8 @@ var require_serializer = __commonJS({
         /* code.startup */
       );
     };
-    var query = (text3) => {
-      return writer.addCString(text3).flush(
+    var query = (text4) => {
+      return writer.addCString(text4).flush(
         81
         /* code.query */
       );
@@ -25624,23 +25583,30 @@ var require_serializer = __commonJS({
         /* code.parse */
       );
     };
-    var writeValues = function(values, valueMapper, formatsOffset) {
-      const len = values.length;
-      for (let i = 0; i < len; i++) {
+    var paramWriter = new buffer_writer_1.Writer();
+    var writeValues = function(values, valueMapper) {
+      for (let i = 0; i < values.length; i++) {
         const mappedVal = valueMapper ? valueMapper(values[i], i) : values[i];
-        let formatByte = 0;
         if (mappedVal == null) {
-          writer.addInt32(-1);
+          writer.addInt16(
+            0
+            /* ParamType.STRING */
+          );
+          paramWriter.addInt32(-1);
         } else if (mappedVal instanceof Buffer) {
-          formatByte = 1;
-          writer.addInt32(mappedVal.length);
-          writer.add(mappedVal);
+          writer.addInt16(
+            1
+            /* ParamType.BINARY */
+          );
+          paramWriter.addInt32(mappedVal.length);
+          paramWriter.add(mappedVal);
         } else {
-          writer.addInt32PrefixedString(mappedVal);
+          writer.addInt16(
+            0
+            /* ParamType.STRING */
+          );
+          paramWriter.addInt32PrefixedString(mappedVal);
         }
-        const buf = writer.buffer;
-        buf[formatsOffset++] = 0;
-        buf[formatsOffset++] = formatByte;
       }
     };
     var bind = (config = {}) => {
@@ -25651,14 +25617,15 @@ var require_serializer = __commonJS({
       const len = values.length;
       writer.addCString(portal).addCString(statement);
       writer.addInt16(len);
-      const formatsOffset = writer.reserveUnsafe(len * 2);
-      writer.addInt16(len);
       try {
-        writeValues(values, config.valueMapper, formatsOffset);
+        writeValues(values, config.valueMapper);
       } catch (err) {
         writer.clear();
+        paramWriter.clear();
         throw err;
       }
+      writer.addInt16(len);
+      writer.add(paramWriter.flush());
       writer.addInt16(1);
       writer.addInt16(
         binary ? 1 : 0
@@ -25717,8 +25684,8 @@ var require_serializer = __commonJS({
       return msg.name ? cstringMessage(68, `${msg.type}${msg.name || ""}`) : msg.type === "P" ? emptyDescribePortal : emptyDescribeStatement;
     };
     var close = (msg) => {
-      const text3 = `${msg.type}${msg.name || ""}`;
-      return cstringMessage(67, text3);
+      const text4 = `${msg.type}${msg.name || ""}`;
+      return cstringMessage(67, text4);
     };
     var copyData = (chunk) => {
       return writer.add(chunk).flush(
@@ -25990,8 +25957,8 @@ var require_parser = __commonJS({
       return new messages_1.ReadyForQueryMessage(LATEINIT_LENGTH, status);
     };
     var parseCommandCompleteMessage = (reader) => {
-      const text3 = reader.cstring();
-      return new messages_1.CommandCompleteMessage(LATEINIT_LENGTH, text3);
+      const text4 = reader.cstring();
+      return new messages_1.CommandCompleteMessage(LATEINIT_LENGTH, text4);
     };
     var parseCopyData = (reader, length) => {
       const chunk = reader.bytes(length - 4);
@@ -26316,12 +26283,7 @@ var require_connection = __commonJS({
       upgradeToSSL(host, reportStreamError) {
         const self = this;
         const options = {
-          socket: self.stream,
-          // tls.connect checks the server identity against `servername`, falling
-          // back to `host` and then to 'localhost'. `servername` must stay unset
-          // for IP addresses (see below), so `host` is needed to keep certificate
-          // validation working when connecting to an IP address.
-          host
+          socket: self.stream
         };
         if (self.ssl !== true) {
           Object.assign(options, self.ssl);
@@ -26378,8 +26340,8 @@ var require_connection = __commonJS({
         }
         return this.stream.write(buffer);
       }
-      query(text3) {
-        this._send(serialize.query(text3));
+      query(text4) {
+        this._send(serialize.query(text4));
       }
       // send parse message
       parse(query) {
@@ -26399,6 +26361,7 @@ var require_connection = __commonJS({
         }
       }
       sync() {
+        this._ending = true;
         this._send(syncBuffer);
       }
       ref() {
@@ -27353,15 +27316,6 @@ var require_client = __commonJS({
         if (query._result && !query._result._types) {
           query._result._types = this._types;
         }
-        if (this.pipeline) {
-          const portalQuery = typeof config.submit === "function" && !(query instanceof Query2) ? "Custom query classes such as pg-cursor and pg-query-stream are" : query.rows ? "The `rows` option is" : null;
-          if (portalQuery) {
-            process.nextTick(() => {
-              query.handleError(new Error(`${portalQuery} not supported in pipeline mode`), this.connection);
-            });
-            return result;
-          }
-        }
         if (!this._queryable) {
           process.nextTick(() => {
             query.handleError(new Error("Client has encountered a connection error and is not queryable"), this.connection);
@@ -27774,9 +27728,9 @@ var require_pg_pool = __commonJS({
         this._idle.push(new IdleItem(client, idleListener, tid));
         this._pulseQueue();
       }
-      query(text3, values, cb) {
-        if (typeof text3 === "function") {
-          const response2 = promisify(this.Promise, text3);
+      query(text4, values, cb) {
+        if (typeof text4 === "function") {
+          const response2 = promisify(this.Promise, text4);
           setImmediate(function() {
             return response2.callback(new Error("Passing a function as the first parameter to pool.query is not supported"));
           });
@@ -27804,7 +27758,7 @@ var require_pg_pool = __commonJS({
           client.once("error", onError);
           this.log("dispatching query");
           try {
-            client.query(text3, values, (err2, res) => {
+            client.query(text4, values, (err2, res) => {
               this.log("query dispatched");
               client.removeListener("error", onError);
               if (clientReleased) {
@@ -27883,8 +27837,6 @@ var require_query3 = __commonJS({
       sqlState: "code",
       statementPosition: "position",
       messagePrimary: "message",
-      messageDetail: "detail",
-      messageHint: "hint",
       context: "where",
       schemaName: "schema",
       tableName: "table",
@@ -27968,7 +27920,7 @@ var require_query3 = __commonJS({
           console.error("This can cause conflicts and silent errors executing queries");
         }
         const values = (this.values || []).map(utils.prepareValue);
-        if (client.namedQueries[this.name] !== void 0) {
+        if (client.namedQueries[this.name]) {
           if (this.text && client.namedQueries[this.name] !== this.text) {
             const err = new Error(`Prepared statements must be unique - '${this.name}' was used for a different statement`);
             return after(err);
@@ -28260,7 +28212,7 @@ var require_client2 = __commonJS({
         this.hasExecuted = true;
         nativeQueries.push(query);
         const values = query.values ? query.values.map(utils.prepareValue) : null;
-        const pipelineEntry = { text: query.text, name: query.name, arrayMode: query._arrayMode };
+        const pipelineEntry = { text: query.text, name: query.name };
         if (values) {
           pipelineEntry.values = values;
         }
@@ -28272,16 +28224,12 @@ var require_client2 = __commonJS({
       this.native.pipeline(queries, function(err, results) {
         self._pipelineInFlight = false;
         if (err) {
-          self._connected = false;
-          self._queryable = false;
           for (let i = 0; i < nativeQueries.length; i++) {
             const q = nativeQueries[i];
             q.native = self.native;
             q.handleError(err);
           }
-          self._errorAllQueries(err);
-          self.emit("error", err);
-          self.emit("end");
+          self._pulsePipelinedQueryQueue();
           return;
         }
         for (let i = 0; i < nativeQueries.length; i++) {
@@ -29060,6 +29008,87 @@ function ragExample(faulty = false) {
 // src/rag-routes.ts
 var import_node_crypto = require("node:crypto");
 
+// src/persona-rag.ts
+var metrics = ["retrievalRecall", "expectedFactCoverage", "referenceCorrectness", "groundedness", "citations", "answerHandling", "prohibitedClaims"];
+function text2(value, max) {
+  return typeof value === "string" && !!value.trim() && value.length <= max;
+}
+function persona(value) {
+  return value && text2(value.name, 200) && text2(value.description, 2e3) && text2(value.questionTemplate, 2e3) && value.questionTemplate.includes("{{topic}}");
+}
+function criteria(value) {
+  return Array.isArray(value) && value.length > 0 && value.length <= metrics.length && new Set(value).size === value.length && value.every((v) => metrics.includes(v));
+}
+function thresholds(value) {
+  if (value !== void 0 && (!value || Array.isArray(value) || typeof value !== "object" || Object.entries(value).some(([key, score]) => !metrics.includes(key) || typeof score !== "number" || !Number.isFinite(score) || score < 0 || score > 100))) throw new Error("Invalid RAG thresholds");
+}
+function draftPersonaRag(input) {
+  const c = input;
+  if (!c || !text2(c.name, 200) || !Array.isArray(c.personas) || !c.personas.length || !c.personas.every(persona) || new Set(c.personas.map((p) => p.name)).size !== c.personas.length || !Array.isArray(c.topics) || !c.topics.length || c.personas.length * c.topics.length > 20 || !c.topics.every((t) => t && text2(t.subject, 1500) && criteria(t.criteria)))
+    throw new Error("Provide named personas with {{topic}} question templates and topics with criteria; maximum 20 combinations");
+  thresholds(c.thresholds);
+  return {
+    version: 1,
+    kind: "persona-rag-draft",
+    name: c.name,
+    thresholds: structuredClone(c.thresholds),
+    candidates: c.personas.flatMap((p, i) => c.topics.map((t, j) => ({
+      id: `persona-${i + 1}-topic-${j + 1}`,
+      persona: structuredClone(p),
+      topic: t.subject,
+      criteria: [...t.criteria],
+      question: p.questionTemplate.replaceAll("{{topic}}", t.subject)
+    })))
+  };
+}
+function ragReviewContent(c) {
+  return JSON.stringify({
+    question: c.question,
+    answerable: c.answerable,
+    referenceAnswer: c.referenceAnswer || "",
+    expectedFacts: c.expectedFacts ?? [],
+    expectedChunkIds: c.expectedChunkIds ?? [],
+    prohibitedClaims: c.prohibitedClaims ?? []
+  });
+}
+function reviewPersonaRagCandidate(candidate, value, reviewer, referenceSource) {
+  if (!candidate || !text2(candidate.id, 100) || !persona(candidate.persona) || !text2(candidate.topic, 1500) || !criteria(candidate.criteria) || !text2(reviewer, 200) || !text2(referenceSource, 2e3))
+    throw new Error("Review requires persona, topic, criteria, reviewer and reference provenance");
+  if (!text2(value.question, 4e3) || typeof value.answerable !== "boolean" || value.answerable && !value.referenceAnswer?.trim() && !value.expectedFacts?.some((f) => f.trim()))
+    throw new Error("Review the question, answerability and independent reference answer/facts first");
+  const reviewed = structuredClone(value);
+  if (!reviewed.referenceAnswer?.trim()) delete reviewed.referenceAnswer;
+  reviewed.id = candidate.id;
+  reviewed.provenance = {
+    kind: candidate.generation === "model" ? "persona-model" : "persona-template",
+    persona: structuredClone(candidate.persona),
+    topic: candidate.topic,
+    criteria: [...candidate.criteria],
+    reviewer: reviewer.trim(),
+    referenceSource: referenceSource.trim(),
+    reviewedContent: ragReviewContent(value)
+  };
+  return reviewed;
+}
+function validatePersonaRagReview(c) {
+  if (c.provenance === void 0) return;
+  const p = c.provenance;
+  if (!p || !["persona-template", "persona-model"].includes(p.kind) || !persona(p.persona) || !text2(p.topic, 1500) || !criteria(p.criteria) || !text2(p.reviewer, 200) || !text2(p.referenceSource, 2e3) || p.reviewedContent !== ragReviewContent(c))
+    throw new Error("Persona case changed or lacks review; review its question and reference evidence again");
+}
+function approvePersonaRagDraft(input) {
+  const d = input;
+  if (!d || d.version !== 1 || d.kind !== "persona-rag-draft" || !text2(d.name, 200) || !Array.isArray(d.candidates) || !d.candidates.length || d.candidates.length > 20)
+    throw new Error("Invalid persona RAG draft");
+  thresholds(d.thresholds);
+  const cases = d.candidates.map((c) => {
+    if (!c.review?.case) throw new Error(`Candidate ${c.id} requires explicit human review`);
+    return reviewPersonaRagCandidate(c, c.review.case, c.review.reviewer, c.review.referenceSource);
+  });
+  if (new Set(cases.map((c) => c.id)).size !== cases.length) throw new Error("Duplicate candidate identifiers");
+  return { version: 1, name: d.name, thresholds: d.thresholds, cases };
+}
+
 // src/rag-contract.ts
 var defaultThresholds = {
   retrievalRecall: 80,
@@ -29096,6 +29125,7 @@ function validateSuite(value) {
   for (const c of value.cases) {
     if (!object2(c) || !string(c.id, 100) || ids.has(c.id) || !string(c.question, 4e3) || typeof c.answerable !== "boolean") throw new Error("Each RAG case needs a unique id, question and boolean answerable");
     ids.add(c.id);
+    validatePersonaRagReview(c);
     if (c.referenceAnswer !== void 0 && !string(c.referenceAnswer, 8e3)) throw new Error("Invalid referenceAnswer");
     for (const k of ["expectedFacts", "expectedChunkIds", "prohibitedClaims"]) {
       if (c[k] !== void 0 && !strings(c[k])) throw new Error(`Invalid ${k}`);
@@ -29159,7 +29189,7 @@ function observationFromReply(reply) {
   return value;
 }
 async function evaluateRag(c, observation, judge, overrides = {}) {
-  const thresholds = { ...defaultThresholds, ...overrides };
+  const thresholds2 = { ...defaultThresholds, ...overrides };
   const report = {
     caseId: c.id,
     status: "inconclusive",
@@ -29170,7 +29200,7 @@ async function evaluateRag(c, observation, judge, overrides = {}) {
     matchedExpectedSourceIds: []
   };
   const check2 = (key, score, explanation, findings = [], state = "available") => {
-    const threshold = key === "citationIdentity" ? 100 : thresholds[key];
+    const threshold = key === "citationIdentity" ? 100 : thresholds2[key];
     report.checks[key] = { state, score, threshold, explanation, findings };
     if (state === "unavailable") report.errors.push(`${key}: unavailable`);
     if (score !== null && score < threshold) report.failures.push(key);
@@ -29279,11 +29309,31 @@ async function runRagSuite(input) {
     evidenceSource: input.invoke ? "live_connector" : "uploaded",
     status,
     qualityGate: { passed: status === "pass", status },
-    cases
+    cases,
+    coveragePlan: input.suite.cases.filter((c) => c.provenance).map((c) => ({
+      caseId: c.id,
+      persona: c.provenance.persona.name,
+      targets: c.provenance.criteria.map((metric) => ({
+        metric,
+        assessmentState: cases.find((r) => r.caseId === c.id)?.checks[metric]?.state ?? "unavailable"
+      })),
+      limitation: "Targets are authored test intentions. Available assessments do not prove that a behaviour was sufficiently exercised."
+    }))
   };
 }
 
 // src/rag-routes.ts
+function ragDraftHandler(approve = false) {
+  return (req, res) => {
+    try {
+      const result = approve ? approvePersonaRagDraft(req.body) : draftPersonaRag(req.body);
+      if (approve) validateSuite(result);
+      res.json(result);
+    } catch (error2) {
+      res.status(400).json({ error: error2.message });
+    }
+  };
+}
 function ragRunHandler(dependencies) {
   return async (req, res, next) => {
     const body = req.body;
@@ -29858,11 +29908,11 @@ function validateConversationDefinition(value) {
     checks: d.workflowChecks ?? { L4: { requireClaim: true } }
   });
 }
-function validateAssessments(output, criteria, messages) {
+function validateAssessments(output, criteria2, messages) {
   const rows = output?.assessments;
-  if (!object3(output) || Object.keys(output).length !== 1 || !Array.isArray(rows) || rows.length !== criteria.length || new Set(rows.map((r) => r?.id)).size !== criteria.length) throw new Error("Incomplete or duplicate criterion verdicts");
+  if (!object3(output) || Object.keys(output).length !== 1 || !Array.isArray(rows) || rows.length !== criteria2.length || new Set(rows.map((r) => r?.id)).size !== criteria2.length) throw new Error("Incomplete or duplicate criterion verdicts");
   const agentText = messages.filter((m) => m.role === "assistant").map((m) => m.content);
-  return criteria.map((c) => {
+  return criteria2.map((c) => {
     const r = rows.find((v) => v?.id === c.id);
     if (!object3(r) || !Number.isFinite(r.score) || r.score < 0 || r.score > 100 || !str(r.explanation) || typeof r.quote !== "string" || r.quote.length > 12e3 || r.quote !== "" && !agentText.some((t) => t.includes(r.quote)))
       throw new Error("Invalid criterion assessment or unsupported quote");
@@ -30268,7 +30318,7 @@ function requireApiKey(requiredScope) {
     next();
   });
 }
-function text2(value, fallback = "") {
+function text3(value, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
 }
 function asInt(value, fallback, min, max) {
@@ -30346,11 +30396,11 @@ app.get("/docs", (_req, res) => {
   });
 });
 app.post("/v1/agents", requireApiKey("agents:write"), asyncRoute(async (req, res) => {
-  const name = text2(req.body?.name);
+  const name = text3(req.body?.name);
   if (!name) return error(res, 400, "name is required");
   const result = await pool.query(
     `INSERT INTO agents (id, name, system_prompt, model) VALUES ($1, $2, $3, $4) RETURNING *`,
-    [id("agent"), name, text2(req.body?.systemPrompt), text2(req.body?.model, "http")]
+    [id("agent"), name, text3(req.body?.systemPrompt), text3(req.body?.model, "http")]
   );
   res.status(201).json(publicAgent(result.rows[0]));
 }));
@@ -30369,8 +30419,8 @@ app.get("/v1/personas", requireApiKey("personas:read"), asyncRoute(async (_req, 
   })));
 }));
 app.post("/v1/connectors", requireApiKey("connectors:write"), asyncRoute(async (req, res) => {
-  const name = text2(req.body?.name);
-  const endpointValue = text2(req.body?.endpointUrl);
+  const name = text3(req.body?.name);
+  const endpointValue = text3(req.body?.endpointUrl);
   if (!name || !endpointValue) return error(res, 400, "name and endpointUrl are required");
   let endpointUrl;
   try {
@@ -30384,12 +30434,12 @@ app.post("/v1/connectors", requireApiKey("connectors:write"), asyncRoute(async (
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
     [
       id("conn"),
-      text2(req.body?.agentId) || null,
+      text3(req.body?.agentId) || null,
       name,
       endpointUrl,
-      text2(req.body?.environment, "production"),
-      text2(req.body?.authType, "none"),
-      text2(req.body?.authValue) || null,
+      text3(req.body?.environment, "production"),
+      text3(req.body?.authType, "none"),
+      text3(req.body?.authValue) || null,
       asInt(req.body?.timeoutMs, 3e4, 1e3, 12e4)
     ]
   );
@@ -30398,8 +30448,8 @@ app.post("/v1/connectors", requireApiKey("connectors:write"), asyncRoute(async (
 app.get("/v1/connectors", requireApiKey("connectors:read"), asyncRoute(async (req, res) => {
   const params = [];
   let query = "SELECT * FROM connectors";
-  if (text2(req.query.env)) {
-    params.push(text2(req.query.env));
+  if (text3(req.query.env)) {
+    params.push(text3(req.query.env));
     query += " WHERE environment = $1";
   }
   query += " ORDER BY created_at DESC";
@@ -30407,10 +30457,10 @@ app.get("/v1/connectors", requireApiKey("connectors:read"), asyncRoute(async (re
   res.json(result.rows.map(publicConnector));
 }));
 app.post("/v1/suites", requireApiKey("suites:write"), asyncRoute(async (req, res) => {
-  const name = text2(req.body?.name);
+  const name = text3(req.body?.name);
   if (!name) return error(res, 400, "name is required");
-  const connectorId = text2(req.body?.connectorId) || null;
-  const agentId = text2(req.body?.agentId) || null;
+  const connectorId = text3(req.body?.connectorId) || null;
+  const agentId = text3(req.body?.agentId) || null;
   if (!connectorId && !agentId) return error(res, 400, "connectorId or agentId is required");
   const result = await pool.query(
     `INSERT INTO suites
@@ -30419,13 +30469,13 @@ app.post("/v1/suites", requireApiKey("suites:write"), asyncRoute(async (req, res
     [
       id("suite"),
       name,
-      text2(req.body?.description),
+      text3(req.body?.description),
       connectorId,
       agentId,
-      text2(req.body?.personaId, "persona-default"),
+      text3(req.body?.personaId, "persona-default"),
       asInt(req.body?.conversationCount, 1, 1, 100),
-      text2(req.body?.testGoal, "Receive a useful response from the agent."),
-      text2(req.body?.successCriteria, "The agent returns a non-empty response.")
+      text3(req.body?.testGoal, "Receive a useful response from the agent."),
+      text3(req.body?.successCriteria, "The agent returns a non-empty response.")
     ]
   );
   res.status(201).json(publicSuite(result.rows[0]));
@@ -30435,6 +30485,8 @@ app.get("/v1/suites", requireApiKey("suites:read"), asyncRoute(async (_req, res)
   res.json(result.rows.map(publicSuite));
 }));
 app.get("/v1/rag/examples", requireApiKey("suites:read"), (_req, res) => res.json({ fixed: ragExample(), faulty: ragExample(true) }));
+app.post("/v1/rag/drafts", requireApiKey("suites:write"), ragDraftHandler());
+app.post("/v1/rag/drafts/approve", requireApiKey("suites:write"), ragDraftHandler(true));
 app.post("/v1/rag/runs", requireApiKey("runs:write"), ragRunHandler({
   judge: configuredRagJudge,
   connector: async (connectorId) => {
@@ -30517,19 +30569,19 @@ app.post("/v1/workflow/runs", requireApiKey("runs:write"), asyncRoute(async (req
   res.status(201).json(report);
 }));
 app.post("/v1/runs", requireApiKey("runs:write"), asyncRoute(async (req, res) => {
-  const suiteId = text2(req.body?.suiteId);
-  const connectorId = text2(req.body?.connectorId);
+  const suiteId = text3(req.body?.suiteId);
+  const connectorId = text3(req.body?.connectorId);
   let suite;
   if (suiteId) {
     suite = (await pool.query("SELECT * FROM suites WHERE id = $1", [suiteId])).rows[0];
-  } else if (text2(req.body?.suiteName)) {
-    suite = (await pool.query("SELECT * FROM suites WHERE name = $1", [text2(req.body.suiteName)])).rows[0];
+  } else if (text3(req.body?.suiteName)) {
+    suite = (await pool.query("SELECT * FROM suites WHERE name = $1", [text3(req.body.suiteName)])).rows[0];
   }
   if (!suite) return error(res, 404, "suite not found; create one with POST /v1/suites");
   const selectedConnectorId = connectorId || suite.connector_id;
   const connector = (await pool.query("SELECT * FROM connectors WHERE id = $1", [selectedConnectorId])).rows[0];
   if (!connector) return error(res, 404, "connector not found; create one with POST /v1/connectors");
-  const baselineId = text2(req.body?.baselineId) || null;
+  const baselineId = text3(req.body?.baselineId) || null;
   if (baselineId) {
     const baseline = (await pool.query("SELECT id FROM baselines WHERE id = $1", [baselineId])).rows[0];
     if (!baseline) return error(res, 400, "baseline not found");
@@ -30538,7 +30590,7 @@ app.post("/v1/runs", requireApiKey("runs:write"), asyncRoute(async (req, res) =>
   const result = await pool.query(
     `INSERT INTO runs (id, suite_id, connector_id, status, label, baseline_id)
      VALUES ($1, $2, $3, 'pending', $4, $5) RETURNING *`,
-    [runId, suite.id, connector.id, text2(req.body?.label) || null, baselineId]
+    [runId, suite.id, connector.id, text3(req.body?.label) || null, baselineId]
   );
   void executeRun(result.rows[0], suite, connector).catch(async (runError) => {
     console.error(`[run ${runId}] ${runError instanceof Error ? runError.message : runError}`);
@@ -30571,7 +30623,7 @@ app.get("/v1/runs/:id/report", requireApiKey("reports:read"), asyncRoute(async (
   res.json(run.report);
 }));
 app.post("/v1/baselines", requireApiKey("baselines:write"), asyncRoute(async (req, res) => {
-  const runId = text2(req.body?.runId);
+  const runId = text3(req.body?.runId);
   const run = (await pool.query("SELECT * FROM runs WHERE id = $1 AND status = 'completed'", [runId])).rows[0];
   if (!run) return error(res, 404, "a completed runId is required");
   const threshold = Number(req.body?.threshold ?? 0);
@@ -30581,7 +30633,7 @@ app.post("/v1/baselines", requireApiKey("baselines:write"), asyncRoute(async (re
   const result = await pool.query(
     `INSERT INTO baselines (id, name, run_id, overall_score, threshold)
      VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [id("baseline"), text2(req.body?.name, "Baseline"), runId, run.overall_score, threshold]
+    [id("baseline"), text3(req.body?.name, "Baseline"), runId, run.overall_score, threshold]
   );
   res.status(201).json(publicBaseline(result.rows[0]));
 }));
@@ -30649,7 +30701,7 @@ async function executeRun(run, suite, connector) {
   );
 }
 async function evaluateConversation(runId, connector, suite, index) {
-  const message = text2(suite.test_goal, "Hello, can you help me?");
+  const message = text3(suite.test_goal, "Hello, can you help me?");
   const conversationId = `${runId}_conversation_${index + 1}`;
   const requestBody = { message, conversationId, history: [] };
   const headers = { "content-type": "application/json" };

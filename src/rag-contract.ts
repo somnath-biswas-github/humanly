@@ -1,10 +1,12 @@
 import { assertLegacyVersion } from "./evaluation-contracts.js";
+import { validatePersonaRagReview, type PersonaRagProvenance } from "./persona-rag.js";
 export type Chunk = { id?: string; chunkId?: string; documentId?: string; content: string };
 export type Citation = { id?: string; chunkId?: string; documentId?: string };
 export type Observation = { answer: string; retrievedChunks?: Chunk[]; citations?: Citation[] };
 export type RagCase = {
   id: string; question: string; answerable: boolean; referenceAnswer?: string;
   expectedFacts?: string[]; expectedChunkIds?: string[]; prohibitedClaims?: string[];
+  provenance?: PersonaRagProvenance;
 };
 export const defaultThresholds = {
   retrievalRecall: 80, expectedFactCoverage: 90, referenceCorrectness: 90,
@@ -54,6 +56,7 @@ export function validateSuite(value: unknown): asserts value is RagSuite {
     if (!object(c) || !string(c.id, 100) || ids.has(c.id) || !string(c.question, 4000) ||
         typeof c.answerable !== "boolean") throw new Error("Each RAG case needs a unique id, question and boolean answerable");
     ids.add(c.id);
+    validatePersonaRagReview(c as RagCase);
     if (c.referenceAnswer !== undefined && !string(c.referenceAnswer, 8000)) throw new Error("Invalid referenceAnswer");
     for (const k of ["expectedFacts", "expectedChunkIds", "prohibitedClaims"]) {
       if (c[k] !== undefined && !strings(c[k])) throw new Error(`Invalid ${k}`);

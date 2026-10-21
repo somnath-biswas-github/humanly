@@ -2,6 +2,17 @@ import { randomUUID } from "node:crypto";
 import type { RequestHandler } from "express";
 import { object, validateSuite, type Judge } from "./rag-contract.js";
 import { runRagSuite, type InvokeAgent } from "./rag.js";
+import { draftPersonaRag, approvePersonaRagDraft } from "./persona-rag.js";
+
+export function ragDraftHandler(approve = false): RequestHandler {
+  return (req, res) => {
+    try {
+      const result = approve ? approvePersonaRagDraft(req.body) : draftPersonaRag(req.body);
+      if (approve) validateSuite(result);
+      res.json(result);
+    } catch (error) { res.status(400).json({ error: (error as Error).message }); }
+  };
+}
 
 export function ragRunHandler(dependencies: {
   judge: () => Judge;

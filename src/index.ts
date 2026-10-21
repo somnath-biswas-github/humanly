@@ -15,7 +15,7 @@ import { evaluateAgentResponse } from "./evaluator.js";
 import { evaluateWorkflow, runWorkflow, validateWorkflowCase } from "./workflow.js";
 import { workflowExample } from "./workflow-examples.js";
 import { ragExample } from "./rag-example.js";
-import { ragRunHandler } from "./rag-routes.js";
+import { ragRunHandler, ragDraftHandler } from "./rag-routes.js";
 import { configuredRagJudge } from "./rag-judge.js";
 import { conversationExample } from "./conversation.js";
 import { conversationRunHandler } from "./conversation-routes.js";
@@ -271,6 +271,8 @@ app.get("/v1/suites", requireApiKey("suites:read"), asyncRoute(async (_req, res)
 }));
 
 app.get("/v1/rag/examples", requireApiKey("suites:read"), (_req, res) => res.json({ fixed: ragExample(), faulty: ragExample(true) }));
+app.post("/v1/rag/drafts", requireApiKey("suites:write"), ragDraftHandler());
+app.post("/v1/rag/drafts/approve", requireApiKey("suites:write"), ragDraftHandler(true));
 app.post("/v1/rag/runs", requireApiKey("runs:write"), ragRunHandler({
   judge: configuredRagJudge,
   connector: async connectorId => {

@@ -5,9 +5,23 @@ import { runRagSuite } from "./rag.js";
 import { configuredRagJudge } from "./rag-judge.js";
 import { ragExample } from "./rag-example.js";
 import { postJsonToConnector } from "./connector-http.js";
+import { draftPersonaRag, approvePersonaRagDraft, generatePersonaRag } from "./persona-rag.js";
+import { configuredProvider } from "./conversation-provider.js";
+import { validateSuite } from "./rag-contract.js";
 
 async function main() {
   const [mode, path, target, output] = process.argv.slice(2);
+  if (mode === "draft" || mode === "draft-model" || mode === "approve") {
+    if (!path || !target) throw new Error("Usage: rag draft personas.json drafts.json | approve reviewed-drafts.json suite.json");
+    const input = JSON.parse(await readFile(path, "utf8"));
+    const result = mode === "draft-model" ? await generatePersonaRag(input, configuredProvider())
+      : mode === "draft" ? draftPersonaRag(input) : approvePersonaRagDraft(input);
+    if (mode === "approve") validateSuite(result);
+    await writeFile(target, JSON.stringify(result, null, 2) + "\n");
+    console.log(mode !== "approve" ? "Draft questions only. Review independently sourced expectations before approval; no evaluation ran."
+      : "Reviewed suite saved. Run explicitly when ready; no evaluation ran.");
+    return;
+  }
   if (mode === "example") {
     if (path && !["fixed", "faulty"].includes(path)) throw new Error("Example must be fixed or faulty");
     console.log(JSON.stringify(ragExample(path === "faulty"), null, 2));

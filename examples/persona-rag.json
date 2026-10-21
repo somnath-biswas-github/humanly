@@ -1,0 +1,20 @@
+{
+  "name": "Representative refund questions",
+  "personas": [
+    {
+      "name": "First-time customer",
+      "description": "Unfamiliar with the service and needs a plain-language explanation.",
+      "questionTemplate": "I'm new to this service. Could you explain {{topic}} in simple terms?"
+    },
+    {
+      "name": "Experienced customer",
+      "description": "Understands the normal process and asks about exceptions.",
+      "questionTemplate": "I know the usual process. What exceptions apply to {{topic}}?"
+    }
+  ],
+  "topics": [
+    { "subject": "refund eligibility", "criteria": ["referenceCorrectness", "groundedness"] },
+    { "subject": "returns after the normal deadline", "criteria": ["answerHandling", "prohibitedClaims"] }
+  ],
+  "thresholds": { "referenceCorrectness": 95, "groundedness": 90, "answerHandling": 100 }
+}

@@ -140,5 +140,12 @@ export async function runRagSuite(input: {
     version: 1, runId: input.runId, suite: input.suite,
     evidenceSource: input.invoke ? "live_connector" : "uploaded",
     status, qualityGate: { passed: status === "pass", status }, cases,
+    coveragePlan: input.suite.cases.filter(c => c.provenance).map(c => ({
+      caseId: c.id, persona: c.provenance!.persona.name,
+      targets: c.provenance!.criteria.map(metric => ({
+        metric, assessmentState: cases.find(r => r.caseId === c.id)?.checks[metric]?.state ?? "unavailable",
+      })),
+      limitation: "Targets are authored test intentions. Available assessments do not prove that a behaviour was sufficiently exercised.",
+    })),
   };
 }

@@ -76,7 +76,10 @@ the evaluator side, not in the agent request.
 
 Semantic checks need your own compatible judge provider. Mock examples verify
 the evaluation pipeline, not real-model accuracy. Missing required retrieval or
-document evidence is not a pass. Multi-turn conversational RAG is not implemented.
+document evidence is not a pass. For multi-turn conversational RAG, use the
+advanced conversation runner with turn-linked retrieval references and metrics.
+For persona-informed independent questions, follow [persona to report](persona-to-report.md).
+L1–L5 supplement this configured journey; they do not replace synthetic users.
 
 ## 4. Connector smoke testing
 
