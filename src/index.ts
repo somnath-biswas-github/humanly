@@ -19,7 +19,7 @@ import { ragRunHandler } from "./rag-routes.js";
 import { configuredRagJudge } from "./rag-judge.js";
 import { conversationExample } from "./conversation.js";
 import { conversationRunHandler } from "./conversation-routes.js";
-import { configuredConversationModel } from "./conversation-model.js";
+import { configuredProvider as configuredConversationModel } from "./conversation-provider.js";
 import type { ConversationResult, Report, RunStatus } from "./types.js";
 
 const app = express();

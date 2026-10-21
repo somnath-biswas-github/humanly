@@ -31,7 +31,8 @@
     "check:links": "node scripts/check-links.mjs",
     "check:lockfiles": "node scripts/portable-lockfiles.mjs --check",
     "lockfiles:portable": "node scripts/portable-lockfiles.mjs",
-    "verify": "npm test && npm run build && npm run check:links",
+    "check:bundle": "node scripts/check-bundle.mjs",
+    "verify": "npm test && npm run check:bundle && npm run build && npm run check:links",
     "demo": "node scripts/demo.mjs"
   },
   "dependencies": {

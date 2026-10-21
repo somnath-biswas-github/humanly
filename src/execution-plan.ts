@@ -1,8 +1,10 @@
 import { validateEvaluationContract, type ScenarioContract, type MetricContract } from "./evaluation-contracts.js";
 import { validateSuite, type RagCase } from "./rag-contract.js";
+import { validateConversationDefinition, type ConversationDefinition } from "./conversation.js";
 
 export type ExecutionPlan = {
-  version: 1; graph?: ScenarioContract; metrics: MetricContract[];
+  version: 1; graph?: ScenarioContract; metrics: MetricContract[]; provider?: "openai"|"anthropic";
+  reviewedCandidate?: Pick<ConversationDefinition,"persona"|"scenario"|"criteria"|"name"> & {generated:true;reviewed:true;minimumScore:number};
   ragCases: Array<{ turn: number; case: RagCase }>;
   limits: { maxTurns: number; maxModelCalls: number; maxTokens: number; timeoutMs: number };
 };
@@ -31,7 +33,14 @@ export function validateExecutionPlan(value: unknown): asserts value is Executio
   const p = value as ExecutionPlan;
   const fail = (message: string): never => { throw new Error(`Invalid execution plan: ${message}`); };
   if (!p || typeof p !== "object" || Array.isArray(p) || p.version !== 1) fail("expected version 1");
-  if (Object.keys(p).some(k => !["version", "graph", "metrics", "ragCases", "limits"].includes(k))) fail("unknown field");
+  if (Object.keys(p).some(k => !["version", "graph", "metrics", "ragCases", "limits", "provider","reviewedCandidate"].includes(k))) fail("unknown field");
+  if(p.reviewedCandidate){
+    const c=p.reviewedCandidate;
+    if(c.generated!==true||c.reviewed!==true||Object.keys(c).some(k=>!["persona","scenario","criteria","name","generated","reviewed","minimumScore"].includes(k)))fail("reviewed candidate");
+    validateConversationDefinition({version:1,kind:"conversation",mode:"synthetic",name:c.name,persona:c.persona,scenario:c.scenario,criteria:c.criteria,
+      config:{conversationCount:1,minimumScore:c.minimumScore,...p.limits}});
+  }
+  if(p.provider!==undefined && !["openai","anthropic"].includes(p.provider))fail("unsupported provider");
   if (!p.limits || typeof p.limits !== "object" || Array.isArray(p.limits) ||
     Object.keys(p.limits).some(k => !["maxTurns", "maxModelCalls", "maxTokens", "timeoutMs"].includes(k))) fail("limits");
   for (const [key, max] of Object.entries({ maxTurns: 50, maxModelCalls: 500, maxTokens: 1000000, timeoutMs: 120000 })) {

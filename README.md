@@ -328,6 +328,13 @@ Run `npm run check:links` to validate repository-internal documentation links.
 
 ## Contributing
 
+Before releasing, use a clean installation (`npm ci`) and run `npm run verify`.
+Verification checks the committed `dist/server.cjs` against a fresh bundle before
+overwriting it. If `npm run check:bundle` reports a mismatch after an intentional
+source or dependency change, run `npm run build`, inspect the diff, and commit the
+source, lockfile and regenerated bundle together. Docker uses that committed
+bundle; a passing source build alone does not establish that it is up to date.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md), the
 [Code of Conduct](CODE_OF_CONDUCT.md), and the prepared
 [good first issue candidates](docs/ROADMAP.md#good-first-issue-candidates).

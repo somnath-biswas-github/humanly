@@ -29,6 +29,9 @@
     "directory": "packages/sdk"
   },
   "homepage": "https://github.com/somnath-biswas-github/humanly#readme",
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
   "devDependencies": {
     "@types/node": "^20.19.27",
     "tsup": "^8.0.0",

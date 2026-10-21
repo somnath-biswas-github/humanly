@@ -179,5 +179,5 @@ export const EVALUATION_CAPABILITIES = [
   { id: "reusable-metrics", oss: "available", studio: "available", interchange: "versioned metrics in executionPlan; separate evidence/exposure gate" },
   { id: "metric-provider-report-extensions", oss: "contract-only", studio: "contract-only", interchange: "validation only; existing reports unchanged" },
   { id: "conversational-rag", oss: "available", studio: "available", interchange: "per-turn reference cases and actual evidence in executionPlan" },
-  { id: "framework-evidence-adapters", oss: "planned", studio: "planned", interchange: "existing starter is not adapter parity" },
+  { id: "framework-evidence-adapters", oss: "available", studio: "available", interchange: "Python local-tool instrumentation; version-pinned local tests, no hosted-tool attestation" },
 ] as const;
