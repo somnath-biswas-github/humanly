@@ -1,5 +1,8 @@
 # Standalone RAG evaluation
 
+Standalone Scripted Tests and scripted conversations are currently disabled.
+Classical RAG remains available and independent of those archived modes.
+
 Humanly OSS can evaluate RAG answers **without a Studio account, subscription,
 or Studio API**. The RAG runner is separate from the legacy non-empty-response
 suite and from scripted L1–L5 workflow checks.
@@ -56,7 +59,7 @@ Set these in your local `.env` (never commit credentials):
 ```dotenv
 RAG_JUDGE_API_KEY=your-provider-key
 RAG_JUDGE_BASE_URL=https://api.openai.com/v1
-RAG_JUDGE_MODEL=gpt-4o-mini
+RAG_JUDGE_MODEL=gpt-4o
 RAG_JUDGE_ALLOW_PRIVATE=false
 ```
 
@@ -209,10 +212,10 @@ Instrument the actual retrieval path; do not ask the agent to fabricate telemetr
 
 The self-hosted API uses existing API-key authentication/scopes:
 
-* `GET /v1/rag/examples` — `suites:read`.
-* `POST /v1/rag/runs` — `runs:write`; body is `{ "suite": ..., "observations": ... }`
+* `GET /v1/rag/examples` - `suites:read`.
+* `POST /v1/rag/runs` - `runs:write`; body is `{ "suite": ..., "observations": ... }`
   or `{ "suite": ..., "connectorId": "saved-connector-id" }`, never both.
-* `GET /v1/runs/:id/report` — `reports:read`; retrieves the persisted full report.
+* `GET /v1/runs/:id/report` - `reports:read`; retrieves the persisted full report.
 
 ```sh
 curl -X POST http://localhost:5000/v1/rag/runs \

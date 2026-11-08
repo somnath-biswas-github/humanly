@@ -13,7 +13,7 @@ export function generateCandidate(requirements: string): Candidate {
       terminal:true,maxVisits:1,onNoMatch:"stop_inconclusive",transitions:[]},
   ]};
   return {version:1,generated:true,approved:false,requirements,definition:{
-    version:1,kind:"conversation",name:"Generated candidate — review required",mode:"synthetic",
+    version:1,kind:"conversation",name:"Generated candidate - review required",mode:"synthetic",
     persona:{name:"Draft customer",description:"Cooperative user seeking help; review this persona for your target audience."},
     scenario:{goal:"Resolve the supplied request or explain limitations.",context:requirements,endCondition:"The configured stages have finished."},
     criteria:[{id:"requirements",description:"Address the supplied requirements without inventing facts or claiming unperformed actions.",weight:100,minimumScore:80,required:true}],

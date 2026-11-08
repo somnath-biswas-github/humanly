@@ -19,6 +19,7 @@ import { ragRunHandler, ragDraftHandler } from "./rag-routes.js";
 import { configuredRagJudge } from "./rag-judge.js";
 import { conversationExample } from "./conversation.js";
 import { conversationRunHandler } from "./conversation-routes.js";
+import { SCRIPTED_TESTS_ENABLED, SCRIPTED_TESTS_UNAVAILABLE } from "./feature-availability.js";
 import { configuredProvider as configuredConversationModel } from "./conversation-provider.js";
 import type { ConversationResult, Report, RunStatus } from "./types.js";
 
@@ -79,7 +80,8 @@ function requireApiKey(requiredScope: string): RequestHandler {
       [hashKey(token)],
     );
     const key = result.rows[0];
-    if (!key || (!key.scopes.includes("*") && !key.scopes.includes(requiredScope))) {
+    if (!key) return error(res, 401, "Invalid or revoked API key");
+    if (!key.scopes.includes("*") && !key.scopes.includes(requiredScope)) {
       return error(res, 403, `API key does not have the ${requiredScope} scope`);
     }
     req.apiKey = key;
@@ -319,8 +321,12 @@ app.post("/v1/conversation/runs", requireApiKey("runs:write"), conversationRunHa
   },
 }));
 
-app.get("/v1/workflow/examples", requireApiKey("suites:read"), (_req,res) => res.json({fixed:workflowExample(),faulty:workflowExample(true)}));
+app.get("/v1/workflow/examples", requireApiKey("suites:read"), (_req,res) => {
+  if(!SCRIPTED_TESTS_ENABLED) return error(res,403,SCRIPTED_TESTS_UNAVAILABLE);
+  return res.json({fixed:workflowExample(),faulty:workflowExample(true)});
+});
 app.post("/v1/workflow/runs", requireApiKey("runs:write"), asyncRoute(async (req,res) => {
+  if(!SCRIPTED_TESTS_ENABLED) return error(res,403,SCRIPTED_TESTS_UNAVAILABLE);
   try { validateWorkflowCase(req.body.case); } catch(e) { return error(res,400,(e as Error).message); }
   const c=req.body.case, runId=id("workflow");
   let result:any;

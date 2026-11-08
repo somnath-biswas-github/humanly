@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-#  humanly — Python SDK for the Humanly AI Agent Testing Platform
+#  humanly - Python SDK for the Humanly AI Agent Testing Platform
 # ─────────────────────────────────────────────────────────────────────────────
 
 from ._client import AsyncHumanlyClient, HumanlyClient

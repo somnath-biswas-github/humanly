@@ -1,5 +1,9 @@
 # Prepare your first test
 
+> **Current release:** Scripted conversation and standalone workflow inputs are
+> archived, not executable through public entry points. Use synthetic-user
+> conversation or RAG inputs. See [availability](feature-availability.md).
+
 Start with [configured synthetic-user tests](conversational-testing.md): choose a
 user, goal, criteria and budgets, execute the configured test, then analyse the
 transcript, findings and scores. The legacy `/v1/runs` endpoint is only a

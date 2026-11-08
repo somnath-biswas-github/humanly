@@ -2,7 +2,7 @@ import type { Action, Evidence, WorkflowCase } from "./workflow.js";
 export function workflowExample(faulty = false): {case:WorkflowCase;evidence:Evidence} {
   const binding: Action = {action:"refund",target:"B",params:{amount:20}};
   const c: WorkflowCase = {
-    version:1,name:"Order workflow — "+(faulty?"faulty":"fixed"),
+    version:1,name:"Order workflow - "+(faulty?"faulty":"fixed"),
     turns:[{message:"Use order A."},{message:"Switch to order B. I confirm refunding £20.",approval:{id:"approval-1",binding}}],
     checks:{
       L1:{allowed:[binding],requireAction:true},L2:{actions:["refund"]},

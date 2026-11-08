@@ -50,4 +50,4 @@ body:
     id: context
     attributes:
       label: Additional context
-      description: Mockups, examples from other tools, links — anything helpful.
+      description: Mockups, examples from other tools, links - anything helpful.

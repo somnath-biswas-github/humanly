@@ -1,6 +1,12 @@
 # Humanly
 
-### Evaluate AI agents before release—and catch regressions in CI
+> **Current release:** Standalone Scripted Tests and scripted conversation mode
+> are temporarily disabled in Studio and OSS. Use adaptive synthetic-user
+> conversations, Conversational RAG or classical RAG. Existing reports and source
+> are retained. Any scripted instructions below are historical, not runnable
+> entry points in this release. See [current availability](docs/feature-availability.md).
+
+### Evaluate AI agents before release-and catch regressions in CI
 
 Humanly OSS tests conversational behaviour, evidence-backed workflows and RAG
 answers. Use authored turns or adaptive synthetic users, inspect the findings,
@@ -52,9 +58,9 @@ checks, not a replacement for that journey.
 
 | Your question | OSS runner | What you configure | Model provider? |
 | --- | --- | --- | --- |
-| Does the agent handle a realistic conversation well? | [Conversation](docs/conversational-testing.md), scripted or synthetic | User turns or persona; scenario; weighted criteria; thresholds and budgets | Yes: judge in both modes, simulator in synthetic mode |
-| Does the agent stay grounded in retrieved knowledge across a multi-turn conversation? | [Conversational RAG](docs/advanced-evaluation.md), using the advanced conversation runner | Persona or scripted turns; scenario; turn-linked independent references; retrieval/citation evidence; criteria and budgets | Yes: conversation and RAG judges; simulator in synthetic mode |
-| Did it act on the right target, obtain approval and report tool outcomes honestly? | [Workflow L1–L5](docs/workflow-evaluation.md) | Scripted turns or captured runtime evidence; explicit action/state expectations | No judge; your agent may still use models |
+| Does the agent handle a realistic conversation well? | [Conversation](docs/conversational-testing.md), synthetic users | Persona; scenario; weighted criteria; thresholds and budgets | Yes: simulator and judge |
+| Does the agent stay grounded in retrieved knowledge across a multi-turn conversation? | [Conversational RAG](docs/advanced-evaluation.md), synthetic users | Persona; scenario; turn-linked independent references; retrieval/citation evidence; criteria and budgets | Yes: simulator, conversation and RAG judges |
+| Are standalone scripted workflow tests available? | Temporarily disabled | Source and reports retained; [availability](docs/feature-availability.md) | No new execution |
 | Are independent answers grounded, correct and supported by retrieved evidence? | [Standalone RAG](docs/rag-evaluation.md) | Independent questions, reference answers/facts, retrieval evidence and thresholds | Yes for semantic judging |
 | Is the connector reachable and returning text? | Legacy single-turn suites | Endpoint, goal, count and optional baseline | No judge; this is only a smoke test |
 

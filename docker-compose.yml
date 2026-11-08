@@ -11,7 +11,7 @@ services:
       HUMANLY_ALLOW_PRIVATE_CONNECTORS: ${HUMANLY_ALLOW_PRIVATE_CONNECTORS:-false}
       RAG_JUDGE_API_KEY: ${RAG_JUDGE_API_KEY:-}
       RAG_JUDGE_BASE_URL: ${RAG_JUDGE_BASE_URL:-https://api.openai.com/v1}
-      RAG_JUDGE_MODEL: ${RAG_JUDGE_MODEL:-gpt-4o-mini}
+      RAG_JUDGE_MODEL: ${RAG_JUDGE_MODEL:-gpt-4o}
       RAG_JUDGE_ALLOW_PRIVATE: ${RAG_JUDGE_ALLOW_PRIVATE:-false}
     volumes:
       - uploads:/opt/humanly/uploads

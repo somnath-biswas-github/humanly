@@ -3039,6 +3039,25 @@ var {
 // src/index.ts
 var import_node_fs = require("node:fs");
 var import_node_path = require("node:path");
+
+// src/gate.ts
+function reportExitCode(report) {
+  if (!report || report.status !== "completed") return 2;
+  const gate = report.qualityGate;
+  if (gate?.status === "inconclusive" || report.errors?.length) return 2;
+  if (report.baselineBreach || gate?.passed === false || gate?.status === "fail") return 1;
+  if (Array.isArray(report.conversations) && report.conversations.length) {
+    if (report.conversations.some((item) => typeof item.passed !== "boolean")) return 2;
+    return report.conversations.every((item) => item.passed) ? 0 : 1;
+  }
+  if (gate?.passed === true && gate.status === "pass") return 0;
+  if (Number.isFinite(report.passRate) && report.passRate >= 0 && report.passRate <= 1 && Number.isInteger(report.conversationCount) && report.conversationCount > 0) {
+    return report.passRate === 1 ? 0 : 1;
+  }
+  return 2;
+}
+
+// src/index.ts
 var program2 = new Command().name("humanly").description("Run Humanly OSS HTTP-agent suites from a terminal or CI").version("0.1.0");
 function config() {
   const apiKey = process.env.HUMANLY_API_KEY;
@@ -3085,7 +3104,7 @@ program2.command("run").description("Trigger a suite and write its JSON report")
 `);
     console.log(`Report: ${reportPath}`);
     console.log(`Score: ${(report.overallScore * 100).toFixed(0)}%`);
-    if (report.baselineBreach) process.exitCode = 1;
+    process.exitCode = reportExitCode(report);
   } catch (cliError) {
     console.error(`Error: ${cliError instanceof Error ? cliError.message : cliError}`);
     process.exitCode = 2;

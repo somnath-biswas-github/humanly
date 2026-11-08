@@ -1,5 +1,10 @@
 # Choose your test
 
+> **Current availability:** Choose synthetic-user conversations, synthetic-user
+> Conversational RAG or classical RAG. Standalone scripted workflow tests and
+> scripted conversations are temporarily disabled. Scripted instructions below
+> are retained historical reference only. See [availability](feature-availability.md).
+
 Humanly OSS helps engineers evaluate agents before deployment and repeat those
 checks in CI. It works without a Studio account. Choose by the question you need
 to answer, not by the framework your agent uses.

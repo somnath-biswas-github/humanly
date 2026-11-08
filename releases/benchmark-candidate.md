@@ -1,4 +1,4 @@
-# Independent benchmark handoff — pinned OSS baseline, benchmark pending
+# Independent benchmark handoff - pinned OSS baseline, benchmark pending
 
 ## Version freeze
 

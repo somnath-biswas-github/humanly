@@ -1,5 +1,10 @@
 # Evaluation extension usage
 
+> **Current release:** Standalone Scripted Tests and scripted conversations are
+> temporarily disabled. Historical acceptance evidence below does not imply those
+> modes are currently enabled. Adaptive evaluations and their supported internal
+> workflow checks remain available. See [availability](feature-availability.md).
+
 See [advanced evaluation](advanced-evaluation.md) for plan structure. Existing
 definitions without executionPlan keep the legacy runner.
 
@@ -42,7 +47,7 @@ failures, retries and streamed completion.
 
 `executionPlan.provider` accepts `openai` or `anthropic`.
 Use `CONVERSATION_MODEL_API_KEY` and optionally `CONVERSATION_MODEL`.
-Default models are gpt-4o-mini and claude-haiku-4-5-20251001 respectively.
+Default models are gpt-4o and claude-haiku-4-5-20251001 respectively.
 Anthropic uses constrained tool output, not a claim that every model supports JSON.
 Provider capability records declare structured output, usage and best-effort
 cancellation. Model output and usage are validated. No paid calibration is implied.

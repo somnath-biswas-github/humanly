@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  @humanlyai/sdk — Humanly AI Agent Testing Platform
+//  @humanlyai/sdk - Humanly AI Agent Testing Platform
 //  TypeScript SDK wrapping the v1 REST API
 // ─────────────────────────────────────────────────────────────────────────────
 

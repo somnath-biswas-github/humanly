@@ -10,9 +10,11 @@ import { generateCandidate, approveCandidate } from "./candidate-tests.js";
 import { withLocalMetrics } from "./local-metrics.js";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
+import {assertScriptedTestsAvailable,assertConversationModeAvailable,SCRIPTED_TESTS_UNAVAILABLE} from "./feature-availability.js";
 
 async function main(){
   const [command,path,target,output]=process.argv.slice(2);
+  if(command==="export-script") assertScriptedTestsAvailable();
   if(command==="example"){console.log(JSON.stringify(conversationExample(),null,2));return;}
   if(command==="generate"&&path){
     console.log(JSON.stringify(generateCandidate(await readFile(path,"utf8")),null,2));return;
@@ -34,6 +36,7 @@ async function main(){
     console.log("Scripted candidate exported. Review before using as a regression baseline.");return;
   }
   const definition=command==="replay"?input.definition:input;
+  assertConversationModeAvailable(definition);
   let model=definition.executionPlan?.provider==="anthropic"
     ?createProvider({provider:"anthropic",apiKey:process.env.CONVERSATION_MODEL_API_KEY,model:process.env.CONVERSATION_MODEL})
     :configuredConversationModel();
@@ -59,4 +62,4 @@ async function main(){
   console.log(JSON.stringify({runId:result.runId,status:result.status,overallScore:result.overallScore,modelCalls:result.modelCalls},null,2));
   process.exitCode=result.status==="pass"?0:result.status==="fail"?1:2;
 }
-main().catch(()=>{console.error("Conversation command failed. Check arguments, JSON, provider configuration and local file permissions. No successful gate was established.");process.exitCode=2;});
+main().catch(error=>{console.error(error instanceof Error && error.message===SCRIPTED_TESTS_UNAVAILABLE ? error.message : "Conversation command failed. Check arguments, JSON, provider configuration and local file permissions. No successful gate was established.");process.exitCode=2;});

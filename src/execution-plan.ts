@@ -1,6 +1,7 @@
 import { validateEvaluationContract, type ScenarioContract, type MetricContract } from "./evaluation-contracts.js";
 import { validateSuite, type RagCase } from "./rag-contract.js";
 import { validateConversationDefinition, type ConversationDefinition } from "./conversation.js";
+import { assertConversationModeAvailable } from "./feature-availability.js";
 
 export type ExecutionPlan = {
   version: 1; graph?: ScenarioContract; metrics: MetricContract[]; provider?: "openai"|"anthropic";
@@ -86,5 +87,6 @@ export function executionPlanFromChecks(checks: any): ExecutionPlan | undefined 
   if (!entry || entry.enabled !== false || entry.weight !== 0 || !entry.config?.plan)
     throw new Error("Execution plan metadata must be disabled, zero-weight and contain a plan");
   validateExecutionPlan(entry.config.plan);
+  assertConversationModeAvailable({executionPlan:entry.config.plan});
   return structuredClone(entry.config.plan);
 }

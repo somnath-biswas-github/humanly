@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  @humanlyai/sdk — Type definitions
+//  @humanlyai/sdk - Type definitions
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface HumanlyClientOptions {

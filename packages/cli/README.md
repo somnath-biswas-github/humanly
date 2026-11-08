@@ -16,8 +16,8 @@ node dist/index.cjs run --suite "$SUITE_ID"
 
 Commands:
 
-- `run --suite <id>` — trigger a run, poll it, and write the report
-- `report --run <id>` — download an existing report
+- `run --suite <id>` - trigger a run, poll it, and write the report
+- `report --run <id>` - download an existing report
 - `list-agents`
 - `list-connectors`
 - `list-suites`

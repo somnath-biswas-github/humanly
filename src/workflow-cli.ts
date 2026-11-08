@@ -1,4 +1,5 @@
 import "dotenv/config";
+import {assertScriptedTestsAvailable} from "./feature-availability.js";
 import {readFile,writeFile} from "node:fs/promises";
 import {randomUUID} from "node:crypto";
 import {evaluateWorkflow,runWorkflow,validateWorkflowCase} from "./workflow.js";
@@ -6,6 +7,7 @@ import {workflowExample} from "./workflow-examples.js";
 import {postJsonToConnector} from "./connector-http.js";
 
 async function main(){
+  assertScriptedTestsAvailable();
   const [mode,path,url,out="workflow-report.json"]=process.argv.slice(2);
   if(mode==="example"){
     const example=workflowExample(path==="faulty");

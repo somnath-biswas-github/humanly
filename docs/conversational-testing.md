@@ -1,5 +1,10 @@
 # Conversational & Workflow Testing
 
+> **Current release:** Only `mode: "synthetic"` is enabled. Scripted run/replay
+> and export-script are disabled, as is the standalone workflow runner.
+> Historical scripted examples below are retained for possible restoration,
+> not current launch instructions. See [availability](feature-availability.md).
+
 Humanly has two tracks: **Conversational & Workflow Testing** and **RAG
 Evaluation**. They are testing approaches, not mutually exclusive agent types.
 
@@ -32,7 +37,7 @@ reports, Git or chat:
 
 - `CONVERSATION_MODEL_API_KEY`: hosted OpenAI-compatible provider credential.
 - `CONVERSATION_MODEL_BASE_URL`: defaults to `https://api.openai.com/v1`.
-- `CONVERSATION_MODEL`: defaults to `gpt-4o-mini`.
+- `CONVERSATION_MODEL`: defaults to `gpt-4o`. Explicit model overrides remain supported.
 - `CONVERSATION_MODEL_ALLOW_PRIVATE=true`: explicitly permit a trusted local
   model endpoint, HTTP and keyless operation. Off by default.
 - `CONVERSATION_AGENT_TOKEN`: optional bearer credential for the tested agent.
@@ -88,7 +93,7 @@ report labels.
 
 ## Execution and evidence
 
-The simulator sees only the persona, scenario and transcript—not the criteria.
+The simulator sees only the persona, scenario and transcript-not the criteria.
 The agent receives the current `message`, prior `history`, complete `messages`,
 unique `conversationId`/`sessionId` and one-based `turn`. It never receives the
 rubric, weights, expected actions or approvals as hidden reference data.
@@ -130,10 +135,10 @@ does not invent approvals or guarantee equivalent behaviour on a new agent.
 
 ## HTTP API
 
-- `GET /v1/conversation/example` — `suites:read`.
-- `POST /v1/conversation/runs` — `runs:write`; body
+- `GET /v1/conversation/example` - `suites:read`.
+- `POST /v1/conversation/runs` - `runs:write`; body
   `{definition, connectorId}` **or** `{definition, replay}`, never both.
-- `GET /v1/runs/:id/report` — existing `reports:read` report endpoint.
+- `GET /v1/runs/:id/report` - existing `reports:read` report endpoint.
 
 The API stores the report in the existing runs table; no database migration.
 

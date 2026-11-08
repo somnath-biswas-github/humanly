@@ -63,7 +63,7 @@ export function createConversationModel(config:{apiKey?:string;baseUrl?:string;m
   if(base.username||base.password||base.search||base.hash||!["https:","http:"].includes(base.protocol)||
     (base.protocol!=="https:"&&!config.allowPrivate))throw new Error("Invalid conversation model endpoint");
   if(!config.apiKey&&!config.allowPrivate)throw new Error("CONVERSATION_MODEL_API_KEY is required for hosted models");
-  const model=config.model??"gpt-4o-mini";
+  const model=config.model??"gpt-4o";
   return async(input,limits)=>{
     if(Buffer.byteLength(JSON.stringify(input))>512000)throw new Error("Conversation model input too large");
     const response=await postJsonToConnector({

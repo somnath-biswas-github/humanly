@@ -3,7 +3,7 @@ import type { Model } from "./conversation.js";
 import { postJsonToConnector } from "./connector-http.js";
 export type ProviderSelection = "openai"|"anthropic";
 export const PROVIDER_CAPABILITIES = {
-  openai:{structuredOutput:true,usage:"reported",cancellation:"best_effort",model:"gpt-4o-mini"},
+  openai:{structuredOutput:true,usage:"reported",cancellation:"best_effort",model:"gpt-4o"},
   anthropic:{structuredOutput:true,usage:"reported",cancellation:"best_effort",model:"claude-haiku-4-5-20251001"},
 } as const;
 export function classifyProviderError(status?:number):"authentication"|"rate_limit"|"unavailable"|"invalid_request" {

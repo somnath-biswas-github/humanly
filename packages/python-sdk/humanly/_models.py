@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-#  humanly — Python SDK type definitions
+#  humanly - Python SDK type definitions
 # ─────────────────────────────────────────────────────────────────────────────
 
 from __future__ import annotations

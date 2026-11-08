@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { reportExitCode } from "./gate";
 
 const program = new Command()
   .name("humanly")
@@ -62,7 +63,7 @@ program.command("run")
       writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
       console.log(`Report: ${reportPath}`);
       console.log(`Score: ${(report.overallScore * 100).toFixed(0)}%`);
-      if (report.baselineBreach) process.exitCode = 1;
+      process.exitCode = reportExitCode(report);
     } catch (cliError) {
       console.error(`Error: ${cliError instanceof Error ? cliError.message : cliError}`);
       process.exitCode = 2;

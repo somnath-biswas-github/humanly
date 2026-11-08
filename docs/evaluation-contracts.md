@@ -1,5 +1,10 @@
 # Evaluation extension contracts (Phase 1)
 
+> **Availability:** Scripted conversation stages and standalone scripted tests are
+> currently disabled. Their contracts below are retained for historical data and
+> future restoration. Use synthetic stages for new evaluations.
+> See [current availability](feature-availability.md).
+
 **Execution update:** Phases 2–3 now accept an opt-in `executionPlan` inside an
 existing conversation definition. See [advanced evaluation](advanced-evaluation.md).
 Standalone contract envelopes still cannot be sent directly to legacy endpoints.

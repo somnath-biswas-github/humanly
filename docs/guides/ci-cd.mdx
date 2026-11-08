@@ -7,14 +7,14 @@ description: Fail a deployment when a Humanly baseline is breached
 
 ## Select the correct gate
 
-For conversational, workflow and RAG runners, use the commands documented in
+For synthetic conversational and RAG runners, use the commands documented in
 the [selection guide](../choose-your-test.md). Exit 0 means pass; both 1
 (failure) and 2 (inconclusive/error) must block release. Model-based CI needs
 provider credentials and may incur provider charges.
 
-Conversation and RAG reports expose `qualityGate`; saved workflow CLI output wraps
-the evaluator result under `report`, where `report.status` must equal `pass`.
-The workflow HTTP API additionally supplies `qualityGate.passed`.
+Conversation and RAG reports expose `qualityGate`. Standalone scripted workflow
+and scripted conversation execution are temporarily disabled. Their API returns
+403 and CLI exits 2; neither is a passing gate. Historical reports remain readable.
 Use these gates rather than the legacy `baselineBreach` field.
 
 The SDK/CLI examples below apply to **legacy single-turn suites**. A

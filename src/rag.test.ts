@@ -259,6 +259,12 @@ test("provider adapter and CLI run end-to-end against a controlled HTTP judge (n
     assert.equal(result.judge?.usage?.totalTokens, 50);
     assert.equal(payloads[0].response_format.json_schema.strict, true);
     assert.deepEqual(payloads[0].response_format.json_schema.schema, judgeSchema(true));
+    assert.equal(payloads[0].model, "fixture-judge", "Explicit model overrides are preserved");
+    assert.equal(result.judge?.usage?.model, "fixture-judge");
+    const defaultResult = await evaluate(createRagJudge({ baseUrl: url + "/v1", allowPrivate: true }));
+    assert.equal(defaultResult.status, "pass");
+    assert.equal(payloads.at(-1).model, "gpt-4o", "Standalone RAG defaults to GPT-4o");
+    assert.equal(defaultResult.judge?.usage?.model, "gpt-4o");
     const faultyBundle = ragExample(true);
     const faultyResult = await evaluateRag(faultyBundle.suite.cases[0], faultyBundle.observations.electronics, judge);
     assert.equal(faultyResult.checks.prohibitedClaims?.score, 0);

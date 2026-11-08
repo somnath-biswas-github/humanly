@@ -1,5 +1,10 @@
 # Branching, reusable metrics and conversational RAG
 
+> **Current release:** Use synthetic-user execution. Scripted conversations and
+> standalone Scripted Tests are temporarily disabled. Any scripted examples or
+> export instructions below are historical; adaptive evidence checks remain
+> available. See [availability](feature-availability.md).
+
 Use the existing conversation CLI/API with an optional `executionPlan`. Existing
 definitions without a plan retain their original runner and scoring.
 
@@ -77,7 +82,7 @@ still exercises the intended question. This is not automatic reference generatio
 The Run Tests editor can apply/remove a plan and save it with the existing test
 set. Metadata is disabled/zero-weight and does not alter saved criterion weights.
 Plans use the existing authenticated run, persistence, reservation and settlement
-path. Managed judging/routing uses gpt-4o-mini; no standalone OSS credential is used.
+path. Managed OpenAI judging/routing uses gpt-4o, matching the OSS conversational default; no standalone OSS credential is used.
 Additional provider and agent usage is accumulated in the existing ledger path.
 Selected Studio criteria become versioned rubric metrics in this opt-in path
 (80 threshold, required exposure); this is not identical legacy score semantics.

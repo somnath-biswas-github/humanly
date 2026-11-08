@@ -46,10 +46,13 @@ test("CLI live synthetic run, replay and script export use local fixtures only",
     assert.equal(agentCalls,1);assert.equal(simulations,2);
     await run(["replay",report,replay]);
     assert.equal(agentCalls,1);assert.equal(simulations,2);
-    await run(["export-script",report,script]);
-    assert.equal(JSON.parse(await readFile(script,"utf8")).mode,"scripted");
+    await assert.rejects(run(["export-script",report,script]),(e:any)=>e.code===2 && /temporarily unavailable/.test(e.stderr));
+    await assert.rejects(readFile(script,"utf8"));
+    await writeFile(script,JSON.stringify({...conversationExample(),mode:"scripted",turns:[{message:"Hello"}]}));
+    await assert.rejects(run(["run",script,base+"/agent",report]),(e:any)=>e.code===2);
+    assert.equal(agentCalls,1);
     rejectJudge=true;
-    await assert.rejects(run(["run",script,base+"/agent",report]),(e:any)=>e.code===1);
+    await assert.rejects(run(["run",definition,base+"/agent",report]),(e:any)=>e.code===1);
     assert.equal(JSON.parse(await readFile(report,"utf8")).status,"fail");
     await writeFile(definition,"{}");
     await assert.rejects(run(["run",definition,base+"/agent",report]),(e:any)=>e.code===2);

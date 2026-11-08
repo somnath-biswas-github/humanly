@@ -17,9 +17,9 @@ export function scoreClaimVerdicts(claims: string[], answer: string, value: unkn
     if (row.quote && !answer.includes(row.quote)) throw new Error("Claim quote not in answer");
     if (row.verdict === "asserted") {
       if (!row.quote.trim()) throw new Error("Missing violation evidence");
-      violations.push(`${claims[row.claimIndex]} — answer: ${row.quote}`);
+      violations.push(`${claims[row.claimIndex]} - answer: ${row.quote}`);
     }
-    explanations.push(`${row.claimIndex}: ${row.verdict} — ${row.explanation}`);
+    explanations.push(`${row.claimIndex}: ${row.verdict} - ${row.explanation}`);
   }
   return { score: violations.length ? 0 : 100, explanation: explanations.join("\n") || "No prohibited claims configured.", findings: violations };
 }

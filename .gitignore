@@ -16,7 +16,7 @@ build/
 .env.local
 .env.*.local
 
-# Uploads (user-generated content — not committed)
+# Uploads (user-generated content - not committed)
 uploads/
 
 # Logs

@@ -1,5 +1,11 @@
 # Conversational testing entry point
 
+> **Archived scripted evaluator guide:** The standalone Scripted Tests UI,
+> workflow API launch endpoints and workflow CLI are temporarily disabled.
+> Do not follow the launch instructions below in this release. Existing reports
+> and internal adaptive workflow checks are preserved.
+> See [current availability and restoration](feature-availability.md).
+
 For synthetic users, conversational criteria, execution limits and replay,
 see [Conversational & Workflow Testing](conversational-testing.md).
 The existing scripted evidence-based L1–L5 contract below remains supported.
@@ -55,7 +61,7 @@ telemetry, not cryptographically attested truth. Instrument the actual execution
 layer rather than asking an LLM to fabricate traces. Missing events falsely
 labelled complete can conceal defects; independently audit instrumentation.
 
-## Quick start — no paid providers
+## Quick start - no paid providers
 
 From the repository root (the `oss-scaffold` directory only in the development
 monorepo; an extracted source archive is already the repository root):

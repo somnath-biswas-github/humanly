@@ -3,6 +3,7 @@ import {randomUUID} from "node:crypto";
 import {runConversation,validateConversationDefinition,type ConversationReport,type Model,type AgentRequest} from "./conversation.js";
 import type {WorkflowReply} from "./workflow.js";
 import type { ProviderSelection } from "./conversation-provider.js";
+import {assertConversationModeAvailable,SCRIPTED_TESTS_UNAVAILABLE} from "./feature-availability.js";
 
 export function conversationRunHandler(dependencies:{
   model:(provider?:ProviderSelection)=>Model;
@@ -12,6 +13,8 @@ export function conversationRunHandler(dependencies:{
   return async(req:Request,res:Response)=>{
     try{
       const {definition,connectorId,replay}=req.body??{};
+      try { assertConversationModeAvailable(definition); assertConversationModeAvailable(replay?.definition); }
+      catch { return res.status(403).json({error:SCRIPTED_TESTS_UNAVAILABLE}); }
       validateConversationDefinition(definition);
       if((replay!==undefined)===(connectorId!==undefined))return res.status(400).json({error:"Provide exactly one of connectorId or replay"});
       if(connectorId!==undefined&&(typeof connectorId!=="string"||!connectorId))return res.status(400).json({error:"Invalid connectorId"});

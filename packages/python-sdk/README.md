@@ -47,7 +47,7 @@ asyncio.run(main())
 ## CI/CD integration
 
 ```python
-# ci_test.py — drop into any pipeline
+# ci_test.py - drop into any pipeline
 import os, sys
 from humanly import HumanlyClient, HumanlyError
 
@@ -66,7 +66,7 @@ print(f"Pass rate: {report.pass_rate:.0%}")
 print(f"Baseline breach: {report.baseline_breach}")
 
 if report.baseline_breach:
-    print("❌ Quality regression detected — blocking deployment")
+    print("❌ Quality regression detected - blocking deployment")
     sys.exit(1)
 
 print("✓ All checks passed")
@@ -89,7 +89,7 @@ report = client.wait_for_run(run.id)
 
 for conv in report.conversations:
     if not conv.passed:
-        print(f"Failed: {conv.persona_name} — score {conv.overall_score:.0%}")
+        print(f"Failed: {conv.persona_name} - score {conv.overall_score:.0%}")
         for check in conv.check_scores:
             if not check.passed:
                 print(f"  ✗ {check.check_name}: {check.explanation}")
@@ -138,7 +138,7 @@ client = HumanlyClient(
 
 ## Links
 
-- [Humanly Studio](https://humanly.ai) — hosted visual platform
+- [Humanly Studio](https://humanly.ai) - hosted visual platform
 - [Documentation](../../docs/quickstart.mdx)
 - [GitHub](https://github.com/somnath-biswas-github/humanly)
 - [TypeScript SDK source](../sdk)
