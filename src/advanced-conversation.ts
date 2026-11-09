@@ -5,7 +5,8 @@ import { ScenarioGraph } from "./scenario-graph.js";
 import { validateMetricPair, type MetricResultContract } from "./evaluation-contracts.js";
 import { evaluateRag, observationFromReply } from "./rag.js";
 import { scoreClaimVerdicts } from "./rag-claim-verdicts.js";
-import { validateAssessment } from "./rag-contract.js";
+import { validateAssessment, RagJudgeError } from "./rag-contract.js";
+import { ragIssues, validateRagDiagnostics } from "./rag-diagnostics.js";
 
 async function timed<T>(fn: () => Promise<T>, ms: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -42,6 +43,7 @@ export async function runAdvancedConversation(options: {
       termination: "error", score: null, assessments: [], branchHistory: [], metricResults: [], ragResults: [], observations: [] };
     conversations.push(r);
     const graph = plan.graph ? new ScenarioGraph(plan.graph) : undefined;
+    let phase: "simulation"|"agent"|"observation"|"evaluation" = "simulation";
     try {
       if (options.replay) {
         const source = options.replay.conversations[i];
@@ -76,6 +78,7 @@ export async function runAdvancedConversation(options: {
           if (typeof message !== "string" || !message.trim() || message.length > 12000) throw new Error("Invalid user turn");
           const history = structuredClone(r.messages);
           r.messages.push({ role: "user", content: message });
+          phase = "agent";
           const reply = await timed(() => options.invoke!({ message, history, messages: structuredClone(r.messages),
             conversationId: r.id, sessionId: r.id, turn }), limits.timeoutMs);
           const answer = workflowResponseText(reply);
@@ -86,6 +89,7 @@ export async function runAdvancedConversation(options: {
             r.evidence.complete = false;
           else r.evidence.events.push(...structuredClone(e.events));
           if (plan.ragCases.some(c => c.turn === turn) || plan.metrics.some(m => m.evidence.includes("retrieval"))) {
+            phase = "observation";
             // Reference answers never enter invoke; only the actual current response is recorded.
             r.observations!.push({ turn, observation: observationFromReply(reply) });
           }
@@ -95,8 +99,10 @@ export async function runAdvancedConversation(options: {
           })) { r.termination = "completed"; break; }
           if (!graph && d.mode === "scripted" && turn === d.turns!.length) { r.termination = "completed"; break; }
           if (turn === limits.maxTurns) r.termination = "turn_limit";
+          phase = "simulation";
         }
       }
+      phase = "evaluation";
       r.assessments = validateAssessments((await call({ purpose: "judge", scenario: d.scenario, criteria: d.criteria, messages: r.messages })).output, d.criteria, r.messages);
       r.score = r.assessments.reduce((sum, a) => sum + a.score * d.criteria.find(c => c.id === a.id)!.weight / 100, 0);
       for (const metric of plan.metrics) {
@@ -128,16 +134,20 @@ export async function runAdvancedConversation(options: {
         const observed = r.observations!.find(o => o.turn === entry.turn);
         if (!observed) {
           r.ragResults!.push({ turn: entry.turn, report: { caseId: entry.case.id, status: "inconclusive", failures: [], errors: ["Turn was not exercised"],
-            checks: {}, matchedExpectedSourceIds: [], missingExpectedSourceIds: entry.case.expectedChunkIds ?? [] } });
+            checks: {}, issues: [{category:"incomplete_exposure",code:"Turn was not exercised"}],
+            matchedExpectedSourceIds: [], missingExpectedSourceIds: entry.case.expectedChunkIds ?? [] } });
           continue;
         }
         // Use actual conversation context for follow-ups; the authored question is evaluator-only reference intent.
         const caseReport = await evaluateRag(entry.case, observed.observation, async input => {
           const response = await call({ purpose: "rag", input, messages: r.messages.slice(0, entry.turn * 2) });
           const a = response.output as any;
+          try {
           a.prohibitedClaims = scoreClaimVerdicts(input.case.prohibitedClaims ?? [], input.observation.answer, a.claimVerdicts);
           validateAssessment(a, !!input.observation.retrievedChunks?.length);
-          return { assessment: a, usage: response.usage };
+          if(a.diagnostics!==undefined)validateRagDiagnostics(a.diagnostics,input,r.messages.slice(0,entry.turn*2));
+          } catch { throw new RagJudgeError("judge_invalid_assessment", response.usage); }
+          return { assessment: a, usage: response.usage, ...(a.diagnostics?{diagnostics:a.diagnostics}:{}) };
         });
         r.ragResults!.push({ turn: entry.turn, report: caseReport });
       }
@@ -157,6 +167,18 @@ export async function runAdvancedConversation(options: {
       // No raw provider/connector exception text is persisted.
       r.status = "inconclusive"; r.error = "Execution or evaluation could not complete; inspect branch history, evidence and configured limits.";
     } finally {
+      for(const entry of plan.ragCases)if(!r.ragResults!.some(x=>x.turn===entry.turn)){
+        const observed=r.observations!.some(x=>x.turn===entry.turn);
+        r.ragResults!.push({turn:entry.turn,report:{caseId:entry.case.id,status:"inconclusive",failures:[],
+          errors:[observed?"Evaluation did not reach this turn.":"Turn was not exercised"],checks:{},
+          matchedExpectedSourceIds:[],missingExpectedSourceIds:entry.case.expectedChunkIds??[],
+          issues:[{category:observed?"evaluator_failure":"incomplete_exposure",code:observed?"evaluation_not_reached":"turn_not_exercised"}]}});
+      }
+      r.issues = [
+        ...(r.error ? [{category:phase==="agent"?"execution_failure" as const:phase==="observation"?"insufficient_evidence" as const:"evaluator_failure" as const,code:`${phase}_incomplete`}] : []),
+        ...(r.termination==="turn_limit" ? [{category:"incomplete_exposure" as const,code:"turn_limit"}] : []),
+        ...(r.ragResults??[]).flatMap(x=>x.report.issues??ragIssues(x.report)),
+      ];
       if (graph && !options.replay) r.branchHistory = graph.history;
     }
   }

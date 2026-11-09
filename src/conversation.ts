@@ -7,6 +7,7 @@ import type { JudgeInput, Observation } from "./rag-contract.js";
 import type { CaseReport as RagCaseReport } from "./rag.js";
 import { runAdvancedConversation } from "./advanced-conversation.js";
 import type { BranchDecision } from "./scenario-graph.js";
+import type { DiagnosticIssue } from "./rag-diagnostics.js";
 
 export type Message = {role:"user"|"assistant";content:string};
 export type ConversationDefinition = {
@@ -32,6 +33,7 @@ export type Assessment = {id:string;score:number;explanation:string;quote:string
 export type ConversationRecord = {
   id:string;messages:Message[];evidence:Evidence;termination:"completed"|"turn_limit"|"error";
   status:Status;score:number|null;assessments:Assessment[];error?:string;
+  issues?: DiagnosticIssue[];
   workflow?:ReturnType<typeof evaluateWorkflow>;
   branchHistory?: BranchDecision[];
   metricResults?: MetricResultContract[];

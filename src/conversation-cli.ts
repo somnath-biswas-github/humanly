@@ -10,10 +10,21 @@ import { generateCandidate, approveCandidate } from "./candidate-tests.js";
 import { withLocalMetrics } from "./local-metrics.js";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
+import { conversationalRagTemplates } from "./conversational-rag-templates.js";
+import { compareRagReports } from "./rag-report-comparison.js";
 import {assertScriptedTestsAvailable,assertConversationModeAvailable,SCRIPTED_TESTS_UNAVAILABLE} from "./feature-availability.js";
 
 async function main(){
   const [command,path,target,output]=process.argv.slice(2);
+  if(command==="rag-template"){
+    const selected=conversationalRagTemplates.find(t=>t.id===path);
+    if(!path){console.log(JSON.stringify(conversationalRagTemplates.map(({id,name,description})=>({id,name,description})),null,2));return;}
+    if(!selected)throw Error("Unknown RAG template");
+    console.log(JSON.stringify(selected.definition,null,2));return;
+  }
+  if(command==="compare-rag"&&path&&target){
+    console.log(JSON.stringify(compareRagReports(JSON.parse(await readFile(path,"utf8")),JSON.parse(await readFile(target,"utf8"))),null,2));return;
+  }
   if(command==="export-script") assertScriptedTestsAvailable();
   if(command==="example"){console.log(JSON.stringify(conversationExample(),null,2));return;}
   if(command==="generate"&&path){

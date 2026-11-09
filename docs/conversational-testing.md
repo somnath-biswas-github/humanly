@@ -1,3 +1,7 @@
+# Evidence-linked conversational RAG
+
+See [Conversational RAG diagnostics](conversational-rag-diagnostics.md) for reviewed starters, exact claim/context references, failure categories, and baseline comparisons. These additions preserve the existing quality gates; model interpretation is not independent proof.
+
 # Conversational & Workflow Testing
 
 > **Current release:** Only `mode: "synthetic"` is enabled. Scripted run/replay

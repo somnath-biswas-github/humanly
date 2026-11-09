@@ -1,4 +1,5 @@
 import { assertLegacyVersion } from "./evaluation-contracts.js";
+import type { RagDiagnostics } from "./rag-diagnostics.js";
 import { validatePersonaRagReview, type PersonaRagProvenance } from "./persona-rag.js";
 export type Chunk = { id?: string; chunkId?: string; documentId?: string; content: string };
 export type Citation = { id?: string; chunkId?: string; documentId?: string };
@@ -19,6 +20,7 @@ export type RagSuite = {
 };
 export type Finding = { score: number; explanation: string; findings: string[] };
 export type Assessment = {
+  diagnostics?: RagDiagnostics;
   expectedFactCoverage: Finding; referenceCorrectness: Finding; prohibitedClaims: Finding;
   answerHandling: Finding & { responseKind: "insufficient_evidence" | "explicit_refusal" | "substantive_answer" | "disclaimer_with_answer" };
   groundedness: Finding | null; citations: Finding | null;
@@ -26,6 +28,7 @@ export type Assessment = {
 export type JudgeInput = { case: RagCase; observation: Observation };
 export type JudgeResult = {
   assessment: Assessment;
+  diagnostics?: RagDiagnostics;
   usage?: { model: string; promptTokens: number; completionTokens: number; totalTokens: number };
 };
 export type Judge = (input: JudgeInput) => Promise<JudgeResult>;

@@ -1,4 +1,5 @@
 import { extractAgentResponse } from "./evaluator.js";
+import { ragIssues, type DiagnosticIssue } from "./rag-diagnostics.js";
 import {
   defaultThresholds, object, RagJudgeError, validateAssessment, validateObservation, validateSuite,
   type RagSuite, type RagCase, type Observation, type Judge, type Metric, type Finding,
@@ -13,6 +14,7 @@ export type CaseReport = {
   missingExpectedSourceIds: string[]; matchedExpectedSourceIds: string[];
   observation?: Observation; judge?: Awaited<ReturnType<Judge>>;
   usage?: Awaited<ReturnType<Judge>>["usage"];
+  issues?: DiagnosticIssue[];
 };
 
 export function observationFromReply(reply: unknown): Observation {
@@ -61,6 +63,7 @@ export async function evaluateRag(
     if (!observation.answer.trim()) {
       report.failures.push("empty_answer");
       report.status = "fail";
+      report.issues = ragIssues(report);
       return report;
     }
     phase = "judge";
@@ -108,6 +111,7 @@ export async function evaluateRag(
       "Judge unavailable, transport blocked or invalid judge output.");
   }
   report.status = report.errors.length ? "inconclusive" : report.failures.length ? "fail" : "pass";
+  report.issues = ragIssues(report);
   return report;
 }
 
@@ -131,7 +135,8 @@ export async function runRagSuite(input: {
       cases.push(await evaluateRag(c, observation, input.judge, input.suite.thresholds));
     } catch {
       cases.push({ caseId: c.id, status: "inconclusive", failures: [], errors: ["Agent execution failed or run deadline reached."],
-        checks: {}, missingExpectedSourceIds: [], matchedExpectedSourceIds: [] });
+        checks: {}, issues: [{category:"execution_failure",code:"agent_execution_incomplete"}],
+        missingExpectedSourceIds: [], matchedExpectedSourceIds: [] });
     }
   }
   const status = cases.some(c => c.status === "inconclusive") ? "inconclusive" :
