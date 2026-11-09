@@ -1,4 +1,4 @@
-import { createConversationModel, conversationModelSchema, conversationSystemPrompt } from "./conversation-model.js";
+import { createConversationModel, conversationModelPayload, conversationModelSchema, conversationSystemPrompt } from "./conversation-model.js";
 import type { Model } from "./conversation.js";
 import { postJsonToConnector } from "./connector-http.js";
 export type ProviderSelection = "openai"|"anthropic";
@@ -27,7 +27,7 @@ export function createProvider(config:{provider:ProviderSelection;apiKey?:string
       timeoutMs:limits.timeoutMs,allowPrivate:config.allowPrivate===true,
       headers:{"content-type":"application/json","anthropic-version":"2023-06-01",...(config.apiKey?{"x-api-key":config.apiKey}:{})},
       body:JSON.stringify({model,max_tokens:limits.maxOutputTokens,system:conversationSystemPrompt(input),
-        messages:[{role:"user",content:JSON.stringify(input)}],
+        messages:[{role:"user",content:conversationModelPayload(input)}],
         tools:[{name:"evaluation",description:"Return the requested evaluation.",input_schema:conversationModelSchema(input)}],
         tool_choice:{type:"tool",name:"evaluation"}})});
     if(!response.ok)throw new Error("Provider "+classifyProviderError(response.status));

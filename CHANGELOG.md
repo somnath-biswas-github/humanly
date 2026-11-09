@@ -16,6 +16,12 @@ All notable changes to Humanly OSS are documented here. The format follows
 
 ### Fixed
 
+- Conversational RAG judge payloads now number every transcript message and
+  current-turn passage explicitly (`messageIndex`, `sourceIndex`). Previously the
+  judge could count messages from zero, and every conversational RAG run became
+  inconclusive. A context reference that still cannot be verified is removed and
+  counted in `droppedContextReferences` instead of discarding the turn's scores.
+  Claim and passage excerpts remain strictly validated.
 - Default suite evaluator now recognises `reply`, `content`, `text` and `answer`
   alongside existing response aliases, with workflow-compatible reply-first
   precedence. Empty replies cannot be masked by fallback fields.

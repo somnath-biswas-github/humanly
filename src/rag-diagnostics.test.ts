@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateRagDiagnostics, ragIssues, type RagDiagnostics } from "./rag-diagnostics.js";
+import { validateRagDiagnostics, ragIssues, numberedRagJudgePayload, type RagDiagnostics } from "./rag-diagnostics.js";
+import { conversationModelPayload } from "./conversation-model.js";
 import { compareRagReports } from "./rag-report-comparison.js";
 import { conversationalRagTemplates } from "./conversational-rag-templates.js";
 import { validateConversationDefinition, runConversation, type Model } from "./conversation.js";
@@ -23,12 +24,36 @@ for(const [name,mutate] of [
   ["nonexistent source",(d:any)=>d.claims[0].evidence[0].sourceIndex=2],
   ["zero source",(d:any)=>d.claims[0].evidence[0].sourceIndex=0],
   ["support without evidence",(d:any)=>d.claims[0].evidence=[]],
-  ["future context",(d:any)=>d.context[0].messageIndex=5],
-  ["invented correction",(d:any)=>d.context[1].quote="It was a gift."],
-  ["empty excerpt",(d:any)=>d.context[1].quote=""],
+  ["unknown context relation",(d:any)=>d.context[0].relation="assumed"],
+  ["empty context explanation",(d:any)=>d.context[0].explanation=""],
   ["oversized claims",(d:any)=>d.claims=Array(51).fill(d.claims[0])],
 ] as const)test(`diagnostics reject ${name}`,()=>{
   const d=structuredClone(diagnostics);mutate(d);assert.throws(()=>validateRagDiagnostics(d,input,messages));
+});
+for(const [name,mutate] of [
+  ["future context",(d:any)=>d.context[0].messageIndex=5],
+  ["zero context index",(d:any)=>d.context[0].messageIndex=0],
+  ["invented correction",(d:any)=>d.context[0].quote="It was a gift."],
+  ["empty excerpt",(d:any)=>d.context[0].quote=""],
+  // Live regression: GPT-4o counted unnumbered messages from zero, pointing at the message before the quote.
+  ["off-by-one message reference",(d:any)=>{d.context[0].messageIndex=3;d.context[0].quote=input.observation.answer;}],
+] as const)test(`unverifiable context (${name}) is dropped and counted without discarding scores`,()=>{
+  const d=structuredClone(diagnostics) as RagDiagnostics;mutate(d);
+  validateRagDiagnostics(d,input,messages);
+  assert.equal(d.context.length,1);assert.equal(d.context[0].messageIndex,3);
+  assert.equal(d.droppedContextReferences,1);assert.equal(d.claims.length,1);
+});
+test("fully verified context records no dropped references",()=>{
+  const d=structuredClone(diagnostics);validateRagDiagnostics(d,input,messages);
+  assert.equal(d.context.length,2);assert.equal(d.droppedContextReferences,undefined);
+});
+test("RAG judge payloads number messages and current passages from one without altering content",()=>{
+  const payload=JSON.parse(conversationModelPayload({purpose:"rag",input,messages} as any));
+  assert.deepEqual(payload.messages.map((m:any)=>m.messageIndex),[1,2,3,4]);
+  assert.equal(payload.messages[3].content,input.observation.answer);
+  assert.deepEqual(payload.input.observation.retrievedChunks,[{sourceIndex:1,...input.observation.retrievedChunks[0]}]);
+  assert.equal(numberedRagJudgePayload({input:{...input,observation:{answer:"x"}},messages:[]}).input.observation.retrievedChunks,undefined);
+  assert.deepEqual(JSON.parse(conversationModelPayload({purpose:"judge",criteria:[],messages} as any)).messages,messages);
 });
 test("past retrieval cannot support the current turn even with the same source id",()=>{
   assert.throws(()=>validateRagDiagnostics(diagnostics,{...input,observation:{...input.observation,
