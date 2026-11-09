@@ -94,11 +94,21 @@ export function validateAssessments(output:unknown, criteria:ConversationDefinit
   const agentText=messages.filter(m=>m.role==="assistant").map(m=>m.content);
   return criteria.map(c=>{
     const r=rows.find((v:any)=>v?.id===c.id);
+    // Models sometimes add presentation delimiters around a verbatim excerpt.
+    // Remove one matching pair ONLY when the inner text is independently present
+    // in an assistant message. Never fuzzy-match, rewrite, or manufacture evidence.
+    let quote = r?.quote;
+    if (typeof quote === "string" && quote.length <= 12000 && quote !== "" && !agentText.some(t=>t.includes(quote))) {
+      const wrapped = [["\"", "\""], ["'", "'"], ["“", "”"], ["‘", "’"]]
+        .some(([open, close]) => quote.startsWith(open) && quote.endsWith(close));
+      const inner = quote.slice(1, -1);
+      if (wrapped && inner.trim() && agentText.some(t=>t.includes(inner))) quote = inner;
+    }
     if(!object(r)||!Number.isFinite(r.score)||r.score<0||r.score>100||!str(r.explanation)||typeof r.quote!=="string"||
-      r.quote.length>12000||(r.quote!==""&&!agentText.some(t=>t.includes(r.quote))))
+      r.quote.length>12000||(quote!==""&&!agentText.some(t=>t.includes(quote))))
       throw new Error("Invalid criterion assessment or unsupported quote");
     keys(r,["id","score","explanation","quote"]);
-    return {id:r.id,score:r.score,explanation:r.explanation,quote:r.quote};
+    return {id:r.id,score:r.score,explanation:r.explanation,quote};
   });
 }
 async function deadline<T>(work:()=>Promise<T>, ms:number):Promise<T> {

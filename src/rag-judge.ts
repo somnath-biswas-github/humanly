@@ -19,7 +19,9 @@ of a prohibited general rule. Merely quoting, negating, or discussing a hypothet
 A disclaimer followed by endorsement still counts. Compare against the ANSWER, not retrieved passages or
 the reference. For asserted, quote the actual offending answer text. For not_asserted, quote relevant
 negation/context where present, or use an empty quote if absent. If meaning is ambiguous return uncertain.
-Do not infer a pass from good grounding or other scores. Return [] only when no prohibited claims exist.
+Do not infer a pass from good grounding or other scores.
+An absent or empty case.prohibitedClaims means ZERO configured claims: claimVerdicts MUST be [].
+Never create a placeholder verdict saying "no prohibited claims". Otherwise return exactly one verdict per configured claim.
 Findings for each other metric must list defects only; a score of 100 requires no defects.
 groundedness: assess factual claims ONLY against retrieved passages, listing unsupported or contradictory claims.
 citations: assess whether cited passages actually support the answer's claims, not merely whether IDs exist.
@@ -29,7 +31,9 @@ All other assessments are required. For unconfigured expected facts/reference us
 explain that none were configured, and return an empty findings list. Findings must be strings.
 Return only the JSON object matching the supplied schema.`;
 
-export function judgeSchema(hasEvidence: boolean) {
+export function judgeSchema(hasEvidence: boolean, claimCount = 0) {
+  if (!Number.isSafeInteger(claimCount) || claimCount < 0 || claimCount > 100)
+    throw new Error("Invalid configured claim count");
   const finding = {
     type: "object", additionalProperties: false,
     properties: { score: { type: "number" }, explanation: { type: "string" }, findings: { type: "array", items: { type: "string" } } },
@@ -39,10 +43,10 @@ export function judgeSchema(hasEvidence: boolean) {
     type: "object", additionalProperties: false,
     properties: {
       expectedFactCoverage: finding, referenceCorrectness: finding,
-      claimVerdicts: { type: "array", items: {
+      claimVerdicts: { type: "array", minItems: claimCount, maxItems: claimCount, items: {
         type: "object", additionalProperties: false,
         properties: {
-          claimIndex: { type: "integer" },
+          claimIndex: { type: "integer", ...(claimCount ? { enum: Array.from({length: claimCount}, (_, i) => i) } : {}) },
           verdict: { type: "string", enum: ["asserted", "not_asserted", "uncertain"] },
           quote: { type: "string" }, explanation: { type: "string" },
         }, required: ["claimIndex", "verdict", "quote", "explanation"],
@@ -74,11 +78,11 @@ export function createRagJudge(config: {
       body: JSON.stringify({
         model, temperature: 0, max_tokens: 5000,
         response_format: { type: "json_schema", json_schema: {
-          name: "rag_assessment", strict: true, schema: judgeSchema(!!input.observation.retrievedChunks?.length),
+          name: "rag_assessment", strict: true, schema: judgeSchema(!!input.observation.retrievedChunks?.length, input.case.prohibitedClaims?.length ?? 0),
         } },
         messages: [
           { role: "system", content: RAG_JUDGE_PROMPT },
-          { role: "user", content: JSON.stringify(input) },
+          { role: "user", content: JSON.stringify({ ...input, case: { ...input.case, prohibitedClaims: input.case.prohibitedClaims ?? [] } }) },
         ],
       }),
     });
