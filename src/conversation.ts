@@ -23,7 +23,8 @@ export type Usage = {model:string;promptTokens:number;completionTokens:number;to
 export type ModelResult = {output:unknown;usage:Usage};
 export type ModelInput =
   | {purpose:"simulate";persona:NonNullable<ConversationDefinition["persona"]>;scenario:ConversationDefinition["scenario"];messages:Message[];turn:number}
-  | {purpose:"judge";scenario:ConversationDefinition["scenario"];criteria:ConversationDefinition["criteria"];messages:Message[]}
+  | {purpose:"judge";scenario:ConversationDefinition["scenario"];criteria:ConversationDefinition["criteria"];messages:Message[];
+      ragContext?:Array<{turn:number;exercised:boolean;reference:JudgeInput["case"];observation?:Observation}>}
   | {purpose:"route";conditions:string[];messages:Message[]}
   | {purpose:"metric";metric:MetricContract;scenario:ConversationDefinition["scenario"];messages:Message[];evidence:Evidence;observations?:Array<{turn:number;observation:Observation}>}
   | {purpose:"rag";input:JudgeInput;messages:Message[]};

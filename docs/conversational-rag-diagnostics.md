@@ -1,3 +1,19 @@
+# Interrupted evaluation and saved answers
+
+Valid turn observations remain in the RAG result even when an earlier metric
+or judge fails. The result stays inconclusive: preserving an answer is not a
+successful assessment. A goal score of 100 cannot override an incomplete required
+RAG check. Errors identify the evaluation stage without exposing provider errors.
+
+In Studio, older results can display an answer from the saved turn observation
+or adjacent assistant transcript, with its source labelled. This does not rebuild
+retrieval evidence, invent diagnostics or change historical scores. An explicitly
+empty retrieval result is different from absent retrieval telemetry.
+
+The deterministic November retest fixtures use controlled answers and mocked
+judge responses. They verify evidence retention and gate behaviour, not live
+semantic accuracy. Public scripted tests remain disabled.
+
 # Conversational RAG diagnostics
 
 Conversational RAG uses current-turn retrieval, independent reference answers and the actual conversation history. References are evaluator-only: they are not added to agent invocation requests. These diagnostics do not change thresholds, normalize saved criteria, retry adverse judgments or merge standalone RAG and conversational scores.
@@ -43,6 +59,31 @@ Studio accepts a local baseline JSON upload on the advanced results view. The co
 Rows align by **conversation position, turn number and case ID**, not by semantic equivalence of independently simulated conversations. Changed configuration is flagged; review comparability before calling a change an improvement. Added/removed turns are explicit. Do not compare aggregate scores across different metric definitions.
 
 ## Verification limits
+
+### Evidence-aware goal judging
+
+When conversational RAG checks are configured, the goal judge also receives their
+evaluator-only references and recorded observations, scoped by turn. Unexercised
+turns are explicitly marked; missing observations or retrieval fields are not
+converted to empty retrieval. References do not prove what the agent retrieved.
+This context is never added to simulator, router or tested-agent requests.
+
+The scoped prompt permits honest uncertainty when information is unavailable but
+does not require a disclaimer for supported answers. Goal criteria still apply
+independently: a RAG pass cannot override a failed required goal, and a goal pass
+cannot override an incomplete or failed RAG check. Non-RAG goal prompts are
+unchanged. Historical scores are not recomputed.
+
+Offline tests verify payloads, isolation, replay and gate composition. This prompt
+change has **not yet been qualified with live judges**; earlier live results used
+the old goal input and must not be represented as validation of this change.
+
+The [Humanly-run live pilot](live-pilot-report.md) recorded 12/12 expected
+Conversational RAG verdicts for both Humanly OSS and DeepEval after the
+diagnostic-reference fix. Humanly used 96 vs 204 model requests on that suite,
+but DeepEval was cheaper and median latency was broadly level. Author-written
+labels and the small sample do not establish independently measured accuracy.
+The report retains the earlier Humanly regression and its requalification.
 
 Offline tests cover exact reference validation, corrections, omitted versus empty retrieval, malformed/fabricated excerpts, stale retrieval, unexercised turns, synthetic runner persistence and baseline comparison. They are not evidence of LLM semantic accuracy, resistance to every prompt injection, or superiority over another evaluator.
 

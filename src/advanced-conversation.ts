@@ -44,6 +44,7 @@ export async function runAdvancedConversation(options: {
     conversations.push(r);
     const graph = plan.graph ? new ScenarioGraph(plan.graph) : undefined;
     let phase: "simulation"|"agent"|"observation"|"evaluation" = "simulation";
+    let evaluationStep = "goal assessment";
     try {
       if (options.replay) {
         const source = options.replay.conversations[i];
@@ -103,9 +104,17 @@ export async function runAdvancedConversation(options: {
         }
       }
       phase = "evaluation";
-      r.assessments = validateAssessments((await call({ purpose: "judge", scenario: d.scenario, criteria: d.criteria, messages: r.messages })).output, d.criteria, r.messages);
+      r.assessments = validateAssessments((await call({
+        purpose: "judge", scenario: d.scenario, criteria: d.criteria, messages: r.messages,
+        ...(plan.ragCases.length ? { ragContext: plan.ragCases.map(entry => {
+          const observed = r.observations!.find(o => o.turn === entry.turn);
+          return { turn: entry.turn, exercised: r.messages[entry.turn * 2 - 1]?.role === "assistant",
+            reference: entry.case, ...(observed ? { observation: observed.observation } : {}) };
+        }) } : {}),
+      })).output, d.criteria, r.messages);
       r.score = r.assessments.reduce((sum, a) => sum + a.score * d.criteria.find(c => c.id === a.id)!.weight / 100, 0);
       for (const metric of plan.metrics) {
+        evaluationStep = `metric ${metric.id}`;
         const knownEvidence = [
           ...r.messages.map((_, j) => ({ id: `message-${j + 1}`, source: "transcript" as const, turn: Math.ceil((j + 1) / 2) })),
           ...(r.evidence.complete ? r.evidence.events.map(e => ({ id: `event-${e.seq}`, source: "runtime" as const, turn: e.turn })) : []),
@@ -131,6 +140,7 @@ export async function runAdvancedConversation(options: {
         validateMetricPair(metric, finding); r.metricResults!.push(finding);
       }
       for (const entry of plan.ragCases) {
+        evaluationStep = `RAG turn ${entry.turn}`;
         const observed = r.observations!.find(o => o.turn === entry.turn);
         if (!observed) {
           r.ragResults!.push({ turn: entry.turn, report: { caseId: entry.case.id, status: "inconclusive", failures: [], errors: ["Turn was not exercised"],
@@ -152,6 +162,7 @@ export async function runAdvancedConversation(options: {
         r.ragResults!.push({ turn: entry.turn, report: caseReport });
       }
       if (d.workflowChecks) {
+        evaluationStep = "workflow checks";
         r.workflow = evaluateWorkflow({ version: 1, name: d.name,
           turns: d.mode === "scripted" ? d.turns! : r.messages.filter(m => m.role === "user").map(m => ({ message: m.content })),
           checks: d.workflowChecks }, r.evidence);
@@ -165,14 +176,18 @@ export async function runAdvancedConversation(options: {
       r.status = unresolved ? "inconclusive" : failed ? "fail" : "pass";
     } catch {
       // No raw provider/connector exception text is persisted.
-      r.status = "inconclusive"; r.error = "Execution or evaluation could not complete; inspect branch history, evidence and configured limits.";
+      r.status = "inconclusive"; r.error = phase === "evaluation"
+        ? `Evaluation stopped at ${evaluationStep}; required checks may not have completed. Inspect recorded issues and configured limits.`
+        : `Conversation stopped during ${phase}; inspect recorded issues and configured limits.`;
     } finally {
       for(const entry of plan.ragCases)if(!r.ragResults!.some(x=>x.turn===entry.turn)){
-        const observed=r.observations!.some(x=>x.turn===entry.turn);
+        const observed=r.observations!.find(x=>x.turn===entry.turn);
+        const answered=r.messages[entry.turn*2-1]?.role==="assistant";
         r.ragResults!.push({turn:entry.turn,report:{caseId:entry.case.id,status:"inconclusive",failures:[],
-          errors:[observed?"Evaluation did not reach this turn.":"Turn was not exercised"],checks:{},
+          ...(observed?{observation:structuredClone(observed.observation)}:{}),
+          errors:[observed?"Evaluation did not reach this turn.":answered?"Answer recorded in transcript, but valid observation evidence was not captured.":"Turn was not exercised"],checks:{},
           matchedExpectedSourceIds:[],missingExpectedSourceIds:entry.case.expectedChunkIds??[],
-          issues:[{category:observed?"evaluator_failure":"incomplete_exposure",code:observed?"evaluation_not_reached":"turn_not_exercised"}]}});
+          issues:[{category:observed?"evaluator_failure":answered?"insufficient_evidence":"incomplete_exposure",code:observed?"evaluation_not_reached":answered?"observation_not_captured":"turn_not_exercised"}]}});
       }
       r.issues = [
         ...(r.error ? [{category:phase==="agent"?"execution_failure" as const:phase==="observation"?"insufficient_evidence" as const:"evaluator_failure" as const,code:`${phase}_incomplete`}] : []),

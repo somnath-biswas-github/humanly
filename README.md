@@ -25,6 +25,28 @@ drop._
 
 ## How it works
 
+### Live evaluator pilots
+
+In a Humanly-run pilot, Humanly OSS matched 60/60 author-written expected
+verdicts versus DeepEval's 56/60, with no false passes by either tool.
+Humanly used **51% fewer model requests overall (190 vs 390)** across the same
+60 executions per tool, but **cost about 13% more** in estimated model usage.
+Workflow used more requests, not fewer. Labels were not independently reviewed;
+these findings are not a general performance guarantee.
+See the [pilot results, methodology and caveats](docs/live-pilot-report.md).
+
+In a **separate RAGAS pilot**, both tools matched 36/36 expected outcomes for
+Conversational Workflow and 36/36 for primary per-turn Conversational RAG.
+Humanly used fewer model requests in these runs. RAGAS's additional
+conversation-goal metric added four failures outside that per-turn comparison.
+Standard RAG native agreement was 35/36 for Humanly and 30/36 for RAGAS
+(33/36 with harness-added citation checks). Different coverage, an unresolved
+refusal-reference mismatch and one Humanly inconclusive result prevent a clean
+accuracy ranking. These were controlled fixtures with provisional author labels:
+36 distinct held-out cases repeated three times per tool, not independent validation.
+See the [RAGAS results and limitations](docs/live-pilot-report.md#separate-corrected-ragas-pilot);
+do not combine their counts or costs with the DeepEval pilot.
+
 ```mermaid
 flowchart LR
     A["Choose a test and configure expectations"] --> B["Run against agent or evaluate evidence"]

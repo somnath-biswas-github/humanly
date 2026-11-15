@@ -1,5 +1,12 @@
 # Independent benchmark handoff - pinned OSS baseline, benchmark pending
 
+> Historical independent-benchmark handoff. The revisions and DeepEval 4.3.1
+> target below describe that frozen plan, not the later live pilot.
+> A separate [Humanly-authored pilot](../docs/live-pilot-report.md) subsequently
+> ran against DeepEval 4.3.3 and published results, including model requests and
+> cost caveats. It does not fulfil this plan's independent label review or
+> held-out validation requirements.
+
 ## Version freeze
 
 - Humanly OSS: **be05a8bd6364a67d635341fa845632368ee69fe1**.
