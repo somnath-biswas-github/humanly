@@ -1,10 +1,14 @@
-# Local release candidate: 0.1.1-oss.0
+# GitHub prerelease: 0.1.1-oss.0
 
-**Not published.** Final version and payload approval are required before any
-GitHub tag/release, public source update or npm publication. Preparing this
-candidate does not approve paid model calls.
+**Published on GitHub.** The user approved the exact payload and subsequently
+removed npm registry publication from scope. Download the source and SDK from
+[the GitHub prerelease](https://github.com/somnath-biswas-github/humanly/releases/tag/v0.1.1-oss.0).
+All four downloads matched the approved hashes; clean public source and SDK
+installations passed. Paid model calls remain outside this approval.
+The immutable archives retain their preparation-time notices; this page records
+the current distribution policy without changing those approved bytes.
 
-## Rechecked public state — 19 November 2026
+## Historical preparation checks — 19 November 2026
 
 - Public repository: https://github.com/somnath-biswas-github/humanly
 - GitHub API returned no tags, releases or open issues. Topics were empty and
@@ -17,7 +21,7 @@ candidate does not approve paid model calls.
   This is an observation, not registry namespace ownership or publication access.
 - No public changes were made during this preparation.
 
-## Exact proposed payload
+## Published payload
 
 | Artifact | Candidate state / compatibility |
 | --- | --- |
@@ -25,8 +29,8 @@ candidate does not approve paid model calls.
 | `humanlyai-sdk-0.1.1-oss.0.tgz` | Built TypeScript legacy REST API client with ESM, CJS, declarations and AGPL licence; clean local consumer checks. Not a synthetic runner client. |
 | `SHA256SUMS` | Exact hashes of the above archives, generated with the payload. |
 | `source-files.json` | Auditable source-file manifest for the source archive. |
-| GitHub tag/release | Proposed `v0.1.1-oss.0`, marked prerelease, attach the four files above. Not created. |
-| npm | Proposed SDK version `0.1.1-oss.0` under dist-tag `oss-next`, not `latest`. Not published. |
+| GitHub tag/release | Published `v0.1.1-oss.0`, marked prerelease, with the four files above. |
+| npm registry | Not a distribution route. No registry publication or dist-tag change is planned. |
 | Python SDK / legacy CLI registries | Not part of this publication request. Source remains included; no registry availability claimed. |
 
 The source server retains API version 0.1.0; the archive's `CANDIDATE_VERSION`
@@ -52,7 +56,8 @@ For a clean Python dependency check rather than using your installed packages:
 The last command builds/packs the SDK, installs the tarball in a temporary clean
 consumer, checks ESM/CJS and TypeScript, and packages only OSS source paths.
 It does not publish. Outputs are ignored under `generated-artifacts/0.1.1-oss.0/`.
-The consumer must receive those reviewed files; these paths are not download URLs.
+These local paths are not download URLs. Consumers should use the GitHub
+prerelease linked above to obtain the reviewed files.
 
 In a fresh directory after receiving the payload:
 
@@ -73,25 +78,22 @@ node --input-type=module -e 'import { HumanlyClient } from "@humanlyai/sdk"; con
 ```
 
 Expected import result: `function`. No provider or API call is made.
-Do not substitute an npm registry install until publication is verified.
+Use the downloaded SDK tarball, not an npm registry version. npm remains the
+local dependency/package installation tool; registry publication is not required.
 
 ## Release approval and access checklist
 
 Before publishing, review the exact manifest and hashes alongside the source
 diff. Any subsequent payload change requires fresh hashes and approval.
 
-- Confirm version `0.1.1-oss.0`, four attachments, SDK-only npm scope and
-  `oss-next` dist-tag.
+- Confirm version `0.1.1-oss.0` and four GitHub attachments.
 - Confirm OSS-only export, licence, bundle consistency and candidate source
   onboarding checks; see [verification](adoption-verification.md).
 - GitHub write/release permission is required for the approved public commit,
   tag and prerelease; repository administration permission for metadata.
-- npm maintainer permission for `@humanlyai/sdk` and an approved trusted
-  publishing or interactive 2FA workflow are required. Access is not verified.
-  Never paste publishing credentials into chat.
 - Approve [metadata/help drafts](repository-presentation.md) separately.
 - After publishing, re-download assets and verify hashes, install the exact
-  registry version in a clean consumer, verify the tag's source and bundle,
+  SDK tarball in a clean consumer, verify the tag's source and bundle,
   and only then remove local-only availability notices.
 
-No campaign, outreach, public issue, discussion or package has been created.
+No campaign, outreach, public issue, new discussion or registry package was created.
