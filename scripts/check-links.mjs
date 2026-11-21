@@ -9,6 +9,7 @@ const roots = [
   "CODE_OF_CONDUCT.md",
   "CHANGELOG.md",
   "docs",
+  "examples",
   "sdk",
   "packages/sdk/README.md",
   "packages/cli/README.md",

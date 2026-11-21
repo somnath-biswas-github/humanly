@@ -16,8 +16,8 @@ milliseconds, expose the check in reports, and test timeout and boundary cases.
 
 **Labels:** `enhancement`, `evaluation`
 
-Multi-turn execution already exists in the workflow and conversation runners,
-including synthetic-user generation. Future work can make configuration and
+Adaptive multi-turn execution exists in the conversation runner;
+standalone scripted workflow entry points are disabled. Future work can make configuration and
 report discovery more consistent across these and the legacy one-turn suites,
 without claiming existing payload interchange or changing historical reports.
 

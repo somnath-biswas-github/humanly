@@ -89,7 +89,8 @@ processing or charging stopped.
 
 | Capability | OSS | Studio |
 | --- | --- | --- |
-| Scripted and synthetic conversations | Available | Available, separate managed runner |
+| Synthetic conversations | Available | Available, separate managed runner |
+| Scripted conversations | Disabled; historical schema retained | Disabled |
 | L1–L5 workflow evidence | Available | Available |
 | Independent-question RAG | Available | Available |
 | Scenario graphs | Contract-only | Contract-only |

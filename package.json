@@ -33,7 +33,10 @@
     "lockfiles:portable": "node scripts/portable-lockfiles.mjs",
     "check:bundle": "node scripts/check-bundle.mjs",
     "verify": "npm test && npm run check:bundle && npm run build && npm run check:links",
-    "demo": "node scripts/demo.mjs"
+    "demo": "tsx scripts/behavioural-demo.ts",
+    "demo:smoke": "node scripts/demo.mjs",
+    "test:adoption": "tsx --test scripts/adoption.test.ts",
+    "prepare:candidate": "node scripts/prepare-candidate.mjs"
   },
   "dependencies": {
     "dotenv": "^16.6.1",

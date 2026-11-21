@@ -14,16 +14,16 @@ Evaluation**. They are testing approaches, not mutually exclusive agent types.
 
 ## Choose a mode
 
-- **Scripted:** authored user turns, predictable input and repeatable regressions.
+- **Scripted:** disabled; retained schemas are historical only.
 - **Synthetic User:** a model uses a persona and scenario to react to the tested
   agent. Conversation outcomes are not deterministic, even at temperature zero.
 
-Both modes use persona (required only for synthetic), scenario, criteria and
-execution configuration. Existing L1–L5 cases remain supported by `npm run workflow`.
-The new `npm run conversation` runs conversational criteria in either mode and
+Synthetic mode uses persona, scenario, criteria and
+execution configuration. Standalone `npm run workflow` is disabled.
+`npm run conversation` runs synthetic conversational criteria and
 can optionally apply `workflowChecks` to actual runtime evidence.
 
-Studio exposes the two modes at `/workflow-evaluation`. Synthetic User opens
+Studio's `/workflow-evaluation` shows an unavailable notice. Synthetic User uses
 the existing `/run` flow, retaining saved personas, criteria, scenarios, test
 configuration, billing and run history. This is a navigation integration, not a
 replacement of the managed Studio runner. Studio's original criteria catalog
@@ -50,15 +50,14 @@ reports, Git or chat:
 
 Provider must support Chat Completions with strict JSON-schema responses and
 token usage. Other provider/model compatibility and quality are not certified.
-Model calls are billed by your provider, not by Studio. Scripted conversation
-grading still uses a judge; the legacy `workflow` L1–L5 runner needs no judge.
+Model calls are billed by your provider, not by Studio.
+Try the [recorded harness walkthrough](behavioural-demo.md) before a live run.
 
 ```sh
 npx tsx src/conversation-cli.ts example > conversation.json
 # Edit the generated definition before using your own connector:
 npm run conversation -- run conversation.json https://your-agent.example/chat report.json
 npm run conversation -- replay report.json regraded-report.json
-npm run conversation -- export-script report.json regression-candidate.json
 ```
 
 The example is a template, not proof that any real agent passed.
@@ -77,7 +76,7 @@ The standalone CLI loads the local `.env` directly.
 
 The generated example is the canonical complete version-1 definition:
 
-- `version: 1`, `kind: "conversation"`, `name`, `mode: "synthetic" | "scripted"`.
+- `version: 1`, `kind: "conversation"`, `name`, `mode: "synthetic"`.
 - `persona`: `name` and `description`; describe tone, knowledge and constraints.
 - `scenario`: `goal`, `context` and `endCondition`. Use a realistic user goal,
   not evaluator-only expected answers.
@@ -86,7 +85,7 @@ The generated example is the canonical complete version-1 definition:
 - `config`: `conversationCount` (1–20), `maxTurns` (1–50), `minimumScore`
   (0–100), `maxModelCalls` (1–500), `maxTokens` (1–1,000,000),
   `timeoutMs` (100–120,000 per operation).
-- Scripted mode additionally requires `turns: [{message, approval?, revoke?}]`.
+- Historical scripted schemas are retained but rejected at public entry points.
 - Optional `workflowChecks` uses the existing [L1–L5 contract](workflow-evaluation.md).
 
 The weighted score must meet `config.minimumScore`. A criterion marked
@@ -134,8 +133,7 @@ timestamps. Treat reports as sensitive; transcripts can contain private data.
 
 Replay regrades saved conversations: it calls the judge but not the agent or
 simulator. Regraded results can vary and are not new live-agent evidence.
-Export-script produces a candidate from the first conversation for review; it
-does not invent approvals or guarantee equivalent behaviour on a new agent.
+Export-script is disabled in this release.
 
 ## HTTP API
 
@@ -152,8 +150,8 @@ Use [RAG Evaluation](rag-evaluation.md) for independent questions with reference
 answers/facts and retrieval evidence. Studio can export an OSS suite from its
 case editor. Export converts thresholds from 0–1 to 0–100 and discloses strict
 evidence policies; it does not guarantee equal scores between judges/runners.
-Conversational RAG and arbitrary Studio-to-OSS test-set conversion are not
-implemented by this release.
+Conversational RAG is supported by the [advanced conversation runner](advanced-evaluation.md).
+Arbitrary Studio-to-OSS test-set conversion is not implemented.
 
 ## Verification
 

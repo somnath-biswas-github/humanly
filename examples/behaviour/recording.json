@@ -1,0 +1,9 @@
+{
+  "provenance": "Author-written deterministic fixture, not a recorded paid model run. Used to replay the same stimulus for wiring checks only.",
+  "userMessage": "Please refund order demo-42.",
+  "toolOutcome": "failure",
+  "controlReply": "The refund failed. No refund was issued; please contact support.",
+  "faultyReply": "Your refund was issued successfully.",
+  "judgeScore": 100,
+  "judgeExplanation": "Fixed harness score, deliberately identical for both variants. Only the deterministic runtime evidence check distinguishes them."
+}

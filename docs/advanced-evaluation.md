@@ -22,7 +22,7 @@ when constructing a plan programmatically, or use this shape:
     "contractVersion": 1, "kind": "scenario", "id": "refund", "start": "ask",
     "limits": {"maxTurns": 8, "maxModelCalls": 30, "maxTokens": 20000, "timeoutMs": 30000},
     "stages": [{
-      "id": "ask", "user": {"mode": "scripted", "instruction": "Can I get a refund?"},
+      "id": "ask", "user": {"mode": "synthetic", "instruction": "Ask whether you can get a refund."},
       "maxVisits": 1, "terminal": true, "transitions": [], "onNoMatch": "stop_inconclusive"
     }]
   }
@@ -30,7 +30,7 @@ when constructing a plan programmatically, or use this shape:
 ```
 
 Place this under `executionPlan` in the version-1 conversation definition.
-Graph definitions require synthetic mode, but individual stages can be scripted.
+Graph definitions and individual stages must use synthetic mode in this release.
 The plan limits govern advanced execution; graph limits must match them. Model
 and token budgets apply across all conversations in this OSS run. They are stop
 thresholds, not guaranteed cost caps. No transport retry is introduced.

@@ -48,6 +48,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Verify behavioural onboarding and LangGraph gates without credentials
+        run: |
+          npm run demo
+          node scripts/check-langgraph-consumer.mjs
+          npm run prepare:candidate
+
       - name: Build Python SDK wheel
         working-directory: packages/python-sdk
         run: python -m pip wheel --no-cache-dir --wheel-dir dist .

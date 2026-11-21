@@ -39,6 +39,7 @@ Thumbs.db
 # Testing
 coverage/
 demo-output/
+generated-artifacts/
 packages/*/LICENSE
 
 # Docker

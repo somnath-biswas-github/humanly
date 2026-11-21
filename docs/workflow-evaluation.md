@@ -1,4 +1,4 @@
-# Conversational testing entry point
+# Archive: scripted workflow contracts and historical examples
 
 > **Archived scripted evaluator guide:** The standalone Scripted Tests UI,
 > workflow API launch endpoints and workflow CLI are temporarily disabled.
@@ -8,7 +8,8 @@
 
 For synthetic users, conversational criteria, execution limits and replay,
 see [Conversational & Workflow Testing](conversational-testing.md).
-The existing scripted evidence-based L1–L5 contract below remains supported.
+The evidence-based L1–L5 contract remains available inside supported adaptive
+evaluations. The standalone commands below are historical, not runnable onboarding.
 
 # Workflow evaluation (L1–L5)
 
