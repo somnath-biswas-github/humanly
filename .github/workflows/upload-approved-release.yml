@@ -1,0 +1,30 @@
+name: Upload approved OSS release
+on:
+  push:
+    branches: [oss-release-upload-0.1.1-oss.0]
+permissions:
+  contents: write
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify approved files
+        working-directory: payload
+        run: |
+          cat > /tmp/approved-sha256 <<'EOF'
+          10a785041c9a82e8d0ecb79d8ae0b99ea6389820b29072dadbcb4e40650ebd91  humanly-oss-0.1.1-oss.0.tar.gz
+          58e39bfdcf190eed41ebcb859a732dcea829dbe6febf776b72648959b9c217cd  humanlyai-sdk-0.1.1-oss.0.tgz
+          49220cd1b484ec33b58ab00e3b18324c2584d18b0402f7e02e652ff8387b906d  SHA256SUMS
+          f707b55c5b1f9ef1254a99edb65ef3de96bc0bb508e202c8bb9e35aa4b7ce16c  source-files.json
+          EOF
+          sha256sum -c /tmp/approved-sha256
+          sha256sum -c SHA256SUMS
+      - name: Attach approved files and publish prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          test "$(gh api repos/$GH_REPO/git/ref/tags/v0.1.1-oss.0 --jq .object.sha)" = "4a99c51eb0f8158103834736b4e24dfdb45e8ee8"
+          gh release upload v0.1.1-oss.0 payload/*
+          gh release edit v0.1.1-oss.0 --draft=false --prerelease --latest=false
