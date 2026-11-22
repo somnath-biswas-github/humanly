@@ -6,6 +6,15 @@ evaluators and saved reports have not been deleted.
 
 ## Available now
 
+These features are included in Humanly OSS without a Studio account or
+subscription. Live simulation and semantic judging use your own provider;
+provider charges can apply. Docker is optional for CLI evaluation. HTTP is
+the agent transport, not a restriction to endpoint smoke tests. Full RAG checks
+require actual retrieval/citation evidence and independent reference data.
+The source and SDK are distributed through the
+[GitHub prerelease](https://github.com/somnath-biswas-github/humanly/releases/tag/v0.1.1-oss.0),
+not a new npm registry package.
+
 - Adaptive conversations using synthetic users (`mode: "synthetic"`).
 - Conversational RAG using synthetic users and independent reference evidence.
 - Classical RAG evaluation.
