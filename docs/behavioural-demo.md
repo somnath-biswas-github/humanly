@@ -2,7 +2,7 @@
 
 ## Credential-free recorded walkthrough
 
-From the candidate source root, Node.js 20+:
+From the published source root, Node.js 20+:
 
 ```sh
 npm ci
@@ -23,7 +23,7 @@ It is harness verification, not adaptive-user quality or semantic judge accuracy
 | Missing evidence | not supplied | not supplied | inconclusive / 2 |
 
 All variants get the same deliberately permissive mock semantic score of 100.
-The L4 runtime check—not the mock judge—catches the faulty claim. This isolates
+The L4 runtime check - not the mock judge - catches the faulty claim. This isolates
 what the demonstration proves. The wrapper succeeds only if all three expected
 outcomes occur; do not use the wrapper's exit code to gate your own agent.
 
