@@ -8,7 +8,7 @@ installations passed. Paid model calls remain outside this approval.
 The immutable archives retain their preparation-time notices; this page records
 the current distribution policy without changing those approved bytes.
 
-## Historical preparation checks — 19 November 2026
+## Historical preparation checks - 19 November 2026
 
 - Public repository: https://github.com/somnath-biswas-github/humanly
 - GitHub API returned no tags, releases or open issues. Topics were empty and
