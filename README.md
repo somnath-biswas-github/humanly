@@ -11,9 +11,25 @@ block deployment on failures **and inconclusive results**.
 
 AGPL-3.0-or-later · Node.js 20+ · No Studio account required.
 
+## What is included in the free OSS release?
+
+**Standalone RAG, conversational RAG and adaptive synthetic-user conversations
+are available now**, without a Studio subscription. HTTP is the connection to
+your agent, not a restriction to endpoint smoke tests. Synthetic users react
+to your agent using a persona and scenario you configure.
+
+Live simulation and semantic judging use your own model provider and can incur
+provider costs. Full RAG checks need actual retrieved passages/citations and
+independently authored reference evidence; answer text alone cannot establish
+retrieval quality or groundedness. Docker is optional for the standalone CLI.
+
+Download the source and SDK from the
+[GitHub prerelease v0.1.1-oss.0](https://github.com/somnath-biswas-github/humanly/releases/tag/v0.1.1-oss.0).
+SDK distribution is via the GitHub tarball, not the npm registry.
+
 ## Try a meaningful failure without credentials
 
-From this source candidate:
+From the source checkout:
 
 ```sh
 npm ci
@@ -48,8 +64,8 @@ See [availability](docs/feature-availability.md).
 
 ## Install and run
 
-The [candidate release checklist](docs/release-candidate.md) distinguishes local
-tarballs from registry packages. Do not install npm `@humanlyai/sdk@0.1.0` for
+The [release and installation guide](docs/release-candidate.md) describes the
+published GitHub downloads. Do not install npm `@humanlyai/sdk@0.1.0` for
 this self-hosted API: it targets the older hosted API.
 
 For source-based evaluation:
@@ -63,9 +79,8 @@ npm run --silent conversation -- example > conversation.json
 npm run conversation -- run conversation.json https://your-agent.example/chat report.json
 ```
 
-The candidate changes must first be published before these new demo/starter
-instructions are available from the public clone. No candidate registry
-publication is claimed. For the persistent REST API, use the
+The demo and starter are available in the public source and GitHub prerelease.
+No npm registry publication is required. For the persistent REST API, use the
 [Docker quick start](docs/quickstart.mdx); CLI evaluations need no database.
 
 ## Connect a LangGraph agent and gate CI
@@ -95,7 +110,7 @@ labels, costs, coverage and inconclusive outcomes. They do not establish general
 accuracy or production safety, and do not qualify this new starter's live judge.
 
 - [Documentation](docs/introduction.mdx) and [CI gates](docs/guides/ci-cd.mdx)
-- [Release candidate and publication boundaries](docs/release-candidate.md)
+- [Published release and installation](docs/release-candidate.md)
 - [Roadmap](docs/ROADMAP.md), [contributing](CONTRIBUTING.md), [security](SECURITY.md)
 - [Licence](LICENSE): AGPL-3.0-or-later; no licence change
 
